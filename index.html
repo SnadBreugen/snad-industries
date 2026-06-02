@@ -199,18 +199,39 @@ apps.forEach(a=>{
 // typed system caption above the banner, timed to roughly match the voice
 function typeCaption(el,text,ms){
   el.classList.remove("fade"); el.classList.add("on"); el.dataset.typing="1"; el.textContent="";
-  const n=text.length, step=Math.max(20, ms/n);
-  let i=0;
-  const iv=setInterval(()=>{
-    i++; el.textContent=text.slice(0,i);
-    if(i>=n){
-      clearInterval(iv); el.dataset.typing="0";
-      setTimeout(()=>{
-        el.classList.remove("on"); el.classList.add("fade");
-        setTimeout(()=>{ el.classList.remove("fade"); el.textContent=""; }, 700);
-      }, 1500);
-    }
-  }, step);
+  const m=text.match(/^(.*?[.!?])\s+(.*)$/);
+  const parts=m?[m[1],m[2]]:[text];
+  const PAUSE=1000;
+  const total=text.replace(/\s+/g," ").length;
+  const step=Math.max(26,(ms-(parts.length>1?PAUSE:0))/total);
+  let pi=0;
+  function typePart(str,done){
+    let i=0;
+    const prefix=pi>0?parts.slice(0,pi).join(" ")+" ":"";
+    const iv=setInterval(()=>{
+      i++;
+      el.textContent=prefix+str.slice(0,i);
+      const ch=str[i-1];
+      if(ch&&ch!==" ") clickTick(0.06);            // subtitles: a touch more intense
+      if(i>=str.length){ clearInterval(iv); done(); }
+    }, step);
+  }
+  function next(){
+    const cur=parts[pi];
+    typePart(cur,()=>{
+      pi++;
+      if(pi<parts.length){ setTimeout(next, PAUSE); }   // ~1s pause, cursor keeps blinking
+      else finish();
+    });
+  }
+  function finish(){
+    el.dataset.typing="0";
+    setTimeout(()=>{
+      el.classList.remove("on"); el.classList.add("fade");
+      setTimeout(()=>{ el.classList.remove("fade"); el.textContent=""; }, 700);
+    }, 1300);
+  }
+  next();
 }
 
 // announcements stay disarmed briefly after lights-on, so the banner the cursor
@@ -235,6 +256,22 @@ function fit(){
 window.addEventListener("resize",fit);
 window.addEventListener("load",fit);
 fit();
+
+// ── faint typing tick (felt more than heard) ──
+let tickCtx=null;
+function clickTick(vol){
+  try{
+    if(!tickCtx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; tickCtx=new AC(); }
+    const ac=tickCtx, t=ac.currentTime;
+    const n=Math.floor(ac.sampleRate*0.011), b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
+    const src=ac.createBufferSource(); src.buffer=b;
+    const hp=ac.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=4200;
+    const g=ac.createGain(); g.gain.value=vol;
+    src.connect(hp); hp.connect(g); g.connect(ac.destination);
+    src.start(t); src.stop(t+0.02);
+  }catch(e){}
+}
 
 // ── pixel shooting-star rain ──
 (function(){
@@ -365,7 +402,12 @@ fit();
     active.add(el);
     let i=0;
     const typer=setInterval(()=>{
-      if(i<chars.length){chars[i].style.opacity="1";i++;}
+      if(i<chars.length){
+        chars[i].style.opacity="1";
+        const t=chars[i].textContent;
+        if(t&&t!=="\u00a0"&&Math.random()<0.55) clickTick(0.014);  // margin: barely there
+        i++;
+      }
       else{ clearInterval(typer); caret.remove(); setTimeout(crumble, 1700+Math.random()*1800); }
     }, 28+Math.random()*26);
     function crumble(){
