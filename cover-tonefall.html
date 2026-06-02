@@ -52,11 +52,11 @@
     text-transform:uppercase; color:var(--dim); }
 
   .word{ font-family:"Silkscreen",monospace; font-weight:700; line-height:.92;
-    font-size:96px; letter-spacing:2px; }
+    font-size:76px; letter-spacing:2px; }
   .word .t{ color:var(--ink); text-shadow:0 0 30px rgba(242,239,230,.25); }
   .word .f{ color:var(--amber); text-shadow:0 0 34px rgba(255,178,40,.55); }
 
-  .tag{ margin-top:20px; max-width:560px; font-size:21px; line-height:1.5; color:#d9d6cc; }
+  .tag{ margin-top:20px; max-width:500px; font-size:18px; line-height:1.5; color:#d9d6cc; }
   .tag b{ color:var(--cyan); font-weight:700; }
   .tag .pk{ color:var(--pink); font-weight:700; }
 
@@ -100,7 +100,7 @@
       <div class="chips">
         <span class="chip a">browser game</span>
         <span class="chip c">midi + audio export</span>
-        <span class="chip p">8-bit voice</span>
+        <span class="chip p">tonematrix</span>
       </div>
     </div>
 
@@ -110,31 +110,31 @@
 (function(){
   const cv=document.getElementById("tet"); if(!cv) return;
   const ctx=cv.getContext("2d");
-  const COLS=5, ROWS=8, CELL=34, GAP=3, BASE=ROWS-4;   // 4-row clear zone at the bottom
+  const COLS=5, ROWS=10, CELL=36, GAP=3, BASE=ROWS-4;   // 4-row clear zone at the bottom, taller well
   const dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=COLS*CELL*dpr; cv.height=ROWS*CELL*dpr;
   cv.style.width=(COLS*CELL)+"px"; cv.style.height=(ROWS*CELL)+"px";
   ctx.scale(dpr,dpr);
 
   const R=r=>BASE+r;
-  // fill cols 0-3 over 4 rows, lückenlos, mixed shapes; leave col 4 (right) open
   const BUILD=[
     [[0,R(1)],[0,R(2)],[0,R(3)],[1,R(3)]],   // L  — left tower
     [[3,R(1)],[3,R(2)],[3,R(3)],[2,R(3)]],   // J  — right tower
     [[1,R(1)],[2,R(1)],[1,R(2)],[2,R(2)]],   // O  — centre
     [[0,R(0)],[1,R(0)],[2,R(0)],[3,R(0)]]    // I  — top bar
   ];
-  const FINAL=[[4,R(0)],[4,R(1)],[4,R(2)],[4,R(3)]];   // vertical I drops into the gap → TETRIS
+  const FINAL=[[4,R(0)],[4,R(1)],[4,R(2)],[4,R(3)]];   // vertical I → TETRIS
 
-  let board, seq, idx, piece, shift, phase, flash, settleT=0, clearT=0, pauseT=0;
+  let board, bloom, seq, idx, piece, shift, phase, flash, settleT=0, clearT=0, pauseT=0;
   function reset(){
     board=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+    bloom=Array.from({length:ROWS},()=>Array(COLS).fill(0));
     seq=BUILD.concat([FINAL]); idx=0; flash=[]; phase="drop"; nextPiece();
   }
   function nextPiece(){
     piece=seq[idx];
     const minRow=Math.min(...piece.map(c=>c[1]));
-    shift=minRow+(idx===seq.length-1?6:2);   // final I starts higher for a longer fall
+    shift=minRow+(idx===seq.length-1?6:2);
   }
   function lockPiece(){ for(const [c,r] of piece){ if(r>=0&&r<ROWS) board[r][c]=1; } }
 
@@ -146,33 +146,61 @@
     ctx.fillStyle="rgba(255,255,255,.3)";
     if(ctx.roundRect){ctx.beginPath();ctx.roundRect(px+s*0.2,py+s*0.2,s*0.6,s*0.6,3);ctx.fill();}
   }
-  function draw(){
+  function bloomDot(x,y,a){
+    const cx=x*CELL+CELL/2, cy=y*CELL+CELL/2;
+    const rad=CELL*(0.6+0.7*a);
+    ctx.save(); ctx.globalCompositeOperation="lighter";
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+    g.addColorStop(0,"rgba(255,222,150,"+(0.95*a)+")");
+    g.addColorStop(0.5,"rgba(255,178,40,"+(0.55*a)+")");
+    g.addColorStop(1,"rgba(255,178,40,0)");
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  function draw(phx){
     ctx.clearRect(0,0,COLS*CELL,ROWS*CELL);
-    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++) if(board[y][x]) cell(x,y, flash.includes(y)?"#ffffff":"#e9e7de", flash.includes(y)?26:7);
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++) if(board[y][x]) cell(x,y, flash.includes(y)?"#ffffff":"#e9e7de", flash.includes(y)?28:7);
     if(phase==="drop"&&piece){ for(const [c,r] of piece){ const yy=r-shift; if(yy>=0) cell(c,yy,"#ffffff",14); } }
+    // bloom circles where the marker has triggered notes
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++) if(bloom[y][x]>0.02) bloomDot(x,y,bloom[y][x]);
+    // marker (sweeps left→right, in canvas)
+    if(phx!=null){ const mx=phx*CELL;
+      ctx.save();
+      if("filter" in ctx) ctx.filter="blur(2.5px)";
+      ctx.globalAlpha=0.8; ctx.fillStyle="#f2efe6"; ctx.shadowColor="#f2efe6"; ctx.shadowBlur=20;
+      ctx.fillRect(mx-3, 4, 6, ROWS*CELL-8);
+      ctx.restore(); }
   }
 
-  function tick(){
-    if(phase==="drop"){
-      if(shift>0){ shift--; }
-      else { lockPiece(); idx++;
-        if(idx<seq.length){ nextPiece(); }
-        else { phase="settle"; settleT=0; }
-      }
-    } else if(phase==="settle"){
-      if(++settleT>=4){ phase="clear"; flash=[R(0),R(1),R(2),R(3)]; clearT=0; }
-    } else if(phase==="clear"){
-      if(++clearT>=5){ for(let k=0;k<4;k++){ board.splice(R(0),1); board.unshift(Array(COLS).fill(0)); } flash=[]; phase="pause"; pauseT=0; }
-    } else if(phase==="pause"){
-      if(++pauseT>=7){ reset(); }
+  function tick(){   // drives only the falling piece
+    if(phase!=="drop") return;
+    if(shift>0){ shift--; }
+    else { lockPiece(); idx++;
+      if(idx<seq.length){ nextPiece(); }
+      else { phase="flash"; flash=[R(0),R(1),R(2),R(3)]; tPhase=0; }   // wall complete → clear right now
     }
   }
 
-  let last=0, acc=0; const DROP=120;
+  let last=0, acc=0; const DROP=150;
+  const SWEEP=2667;            // one marker pass = 4 beats @ 90 bpm
+  const FLASH_MS=80, PAUSE_MS=520;
+  let phT=0, prevCol=-1, tPhase=0;
   function loop(t){
-    if(!last)last=t; acc+=t-last; last=t;
-    while(acc>=DROP){ tick(); acc-=DROP; }
-    draw(); requestAnimationFrame(loop);
+    if(!last)last=t; const dt=t-last; last=t;
+    if(phase==="drop"){ acc+=dt; while(acc>=DROP){ tick(); acc-=DROP; } }
+    else if(phase==="flash"){ tPhase+=dt; if(tPhase>=FLASH_MS){ board.splice(R(0),4); for(let k=0;k<4;k++) board.unshift(Array(COLS).fill(0)); flash=[]; phase="pause"; tPhase=0; } }
+    else if(phase==="pause"){ tPhase+=dt; if(tPhase>=PAUSE_MS){ reset(); } }
+    // marker sweep (restarts each loop with the build → choreographed)
+    phT=(phT+dt)%SWEEP;
+    const phx=(phT/SWEEP)*COLS;
+    const col=Math.floor(phx);
+    if(col!==prevCol){
+      for(let r=0;r<ROWS;r++) if(board[r] && board[r][col]) bloom[r][col]=1;
+      prevCol=col;
+    }
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(bloom[r][c]>0) bloom[r][c]*=0.90;
+    draw(phx);
+    requestAnimationFrame(loop);
   }
   reset();
   requestAnimationFrame(loop);
