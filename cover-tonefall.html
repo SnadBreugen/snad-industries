@@ -52,7 +52,7 @@
     text-transform:uppercase; color:var(--dim); }
 
   .word{ font-family:"Silkscreen",monospace; font-weight:700; line-height:.92;
-    font-size:112px; letter-spacing:2px; }
+    font-size:96px; letter-spacing:2px; }
   .word .t{ color:var(--ink); text-shadow:0 0 30px rgba(242,239,230,.25); }
   .word .f{ color:var(--amber); text-shadow:0 0 34px rgba(255,178,40,.55); }
 
@@ -71,41 +71,15 @@
     font-size:13px; letter-spacing:2px; color:var(--dim); }
   .url b{ color:var(--amber); }
 
-  /* floating tetromino blocks, right side */
-  .blocks{ position:absolute; right:60px; top:0; bottom:0; width:380px; z-index:2; }
-  .blk{ position:absolute; width:46px; height:46px; border-radius:8px;
-    box-shadow:0 0 22px currentColor, inset 0 0 8px rgba(255,255,255,.35); }
-  .blk i{ position:absolute; inset:7px; border-radius:4px; background:rgba(255,255,255,.85); opacity:.5; }
-  .c-cyan{ color:#f2efe6; background:#f2efe6; }
-  .c-amb{ color:#f2efe6; background:#f2efe6; }
-  .c-pink{ color:#f2efe6; background:#f2efe6; }
-  .float{ animation:bob 4.5s ease-in-out infinite; }
-  @keyframes bob{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-14px) } }
-  .playhead{ position:absolute; top:8%; bottom:8%; width:3px; right:196px; z-index:2;
-    background:linear-gradient(to bottom, transparent, #f2efe6, transparent);
-    box-shadow:0 0 18px #f2efe6; opacity:.7; animation:sweep 3.4s ease-in-out infinite alternate; }
-  @keyframes sweep{ from{ right:300px } to{ right:90px } }
+  /* falling tetris well, right side */
+  .well{ position:absolute; right:96px; top:50%; transform:translateY(-50%); z-index:2; }
+  .well canvas{ display:block; }
+  .well::before{ content:""; position:absolute; inset:-8px -10px; border:1px solid rgba(242,239,230,.12); border-radius:8px; pointer-events:none; }
 </style>
 </head>
 <body>
   <div class="banner">
-    <div class="blocks">
-      <div class="blk c-cyan float" style="top:96px; right:230px; animation-delay:0s"><i></i></div>
-      <div class="blk c-cyan float" style="top:142px; right:230px; animation-delay:.05s"><i></i></div>
-      <div class="blk c-cyan float" style="top:188px; right:230px; animation-delay:.1s"><i></i></div>
-      <div class="blk c-cyan float" style="top:188px; right:184px; animation-delay:.15s"><i></i></div>
-
-      <div class="blk c-pink float" style="top:300px; right:158px; animation-delay:.5s"><i></i></div>
-      <div class="blk c-pink float" style="top:300px; right:112px; animation-delay:.55s"><i></i></div>
-      <div class="blk c-pink float" style="top:346px; right:204px; animation-delay:.6s"><i></i></div>
-      <div class="blk c-pink float" style="top:346px; right:158px; animation-delay:.65s"><i></i></div>
-
-      <div class="blk c-amb float" style="top:452px; right:104px; animation-delay:.4s"><i></i></div>
-      <div class="blk c-amb float" style="top:452px; right:150px; animation-delay:.45s"><i></i></div>
-      <div class="blk c-amb float" style="top:452px; right:196px; animation-delay:.5s"><i></i></div>
-      <div class="blk c-amb float" style="top:406px; right:150px; animation-delay:.55s"><i></i></div>
-    </div>
-    <div class="playhead"></div>
+    <div class="well"><canvas id="tet"></canvas></div>
 
     <div class="inner">
       <div class="kicker">
@@ -127,11 +101,82 @@
         <span class="chip a">browser game</span>
         <span class="chip c">midi + audio export</span>
         <span class="chip p">8-bit voice</span>
-        <span class="chip">tempo-locked loops</span>
       </div>
     </div>
 
     <div class="url">snadbreugen.github.io/<b>tonefall-audiotool</b></div>
   </div>
+<script>
+(function(){
+  const cv=document.getElementById("tet"); if(!cv) return;
+  const ctx=cv.getContext("2d");
+  const COLS=5, ROWS=8, CELL=34, GAP=3, BASE=ROWS-4;   // 4-row clear zone at the bottom
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=COLS*CELL*dpr; cv.height=ROWS*CELL*dpr;
+  cv.style.width=(COLS*CELL)+"px"; cv.style.height=(ROWS*CELL)+"px";
+  ctx.scale(dpr,dpr);
+
+  const R=r=>BASE+r;
+  // fill cols 0-3 over 4 rows, lückenlos, mixed shapes; leave col 4 (right) open
+  const BUILD=[
+    [[0,R(1)],[0,R(2)],[0,R(3)],[1,R(3)]],   // L  — left tower
+    [[3,R(1)],[3,R(2)],[3,R(3)],[2,R(3)]],   // J  — right tower
+    [[1,R(1)],[2,R(1)],[1,R(2)],[2,R(2)]],   // O  — centre
+    [[0,R(0)],[1,R(0)],[2,R(0)],[3,R(0)]]    // I  — top bar
+  ];
+  const FINAL=[[4,R(0)],[4,R(1)],[4,R(2)],[4,R(3)]];   // vertical I drops into the gap → TETRIS
+
+  let board, seq, idx, piece, shift, phase, flash, settleT=0, clearT=0, pauseT=0;
+  function reset(){
+    board=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+    seq=BUILD.concat([FINAL]); idx=0; flash=[]; phase="drop"; nextPiece();
+  }
+  function nextPiece(){
+    piece=seq[idx];
+    const minRow=Math.min(...piece.map(c=>c[1]));
+    shift=minRow+(idx===seq.length-1?6:2);   // final I starts higher for a longer fall
+  }
+  function lockPiece(){ for(const [c,r] of piece){ if(r>=0&&r<ROWS) board[r][c]=1; } }
+
+  function cell(x,y,col,glow){
+    const px=x*CELL+GAP/2, py=y*CELL+GAP/2, s=CELL-GAP;
+    ctx.save(); ctx.shadowColor="rgba(242,239,230,.7)"; ctx.shadowBlur=glow; ctx.fillStyle=col;
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(px,py,s,s,5);ctx.fill();} else ctx.fillRect(px,py,s,s);
+    ctx.restore();
+    ctx.fillStyle="rgba(255,255,255,.3)";
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(px+s*0.2,py+s*0.2,s*0.6,s*0.6,3);ctx.fill();}
+  }
+  function draw(){
+    ctx.clearRect(0,0,COLS*CELL,ROWS*CELL);
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++) if(board[y][x]) cell(x,y, flash.includes(y)?"#ffffff":"#e9e7de", flash.includes(y)?26:7);
+    if(phase==="drop"&&piece){ for(const [c,r] of piece){ const yy=r-shift; if(yy>=0) cell(c,yy,"#ffffff",14); } }
+  }
+
+  function tick(){
+    if(phase==="drop"){
+      if(shift>0){ shift--; }
+      else { lockPiece(); idx++;
+        if(idx<seq.length){ nextPiece(); }
+        else { phase="settle"; settleT=0; }
+      }
+    } else if(phase==="settle"){
+      if(++settleT>=4){ phase="clear"; flash=[R(0),R(1),R(2),R(3)]; clearT=0; }
+    } else if(phase==="clear"){
+      if(++clearT>=5){ for(let k=0;k<4;k++){ board.splice(R(0),1); board.unshift(Array(COLS).fill(0)); } flash=[]; phase="pause"; pauseT=0; }
+    } else if(phase==="pause"){
+      if(++pauseT>=7){ reset(); }
+    }
+  }
+
+  let last=0, acc=0; const DROP=120;
+  function loop(t){
+    if(!last)last=t; acc+=t-last; last=t;
+    while(acc>=DROP){ tick(); acc-=DROP; }
+    draw(); requestAnimationFrame(loop);
+  }
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
 </body>
 </html>
