@@ -571,7 +571,30 @@ if(starter){
     setTimeout(()=>starter.remove(),700);
     setTimeout(()=>document.body.classList.remove("lightson"),1300);
     setTimeout(()=>{ voiceArmed=true; },1400);
+    cinematicIntro();
   });
+}
+
+// cinematic: show an overview, then zoom into the top / first banner
+function cinematicIntro(){
+  const wrap=document.querySelector(".wrap");
+  const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if(!wrap || reduce || window.innerWidth<820 || !wrap.animate){ return; }
+  try{
+    window.scrollTo(0,0);
+    const html=document.documentElement;
+    html.style.overflow="hidden";
+    wrap.style.transformOrigin="50% 0";
+    const anim=wrap.animate(
+      [
+        { transform:"scale(0.5)" },
+        { transform:"scale(0.5)", offset:0.40 },   // hold the overview ~1s
+        { transform:"scale(1)" }                    // zoom into the top
+      ],
+      { duration:2600, easing:"cubic-bezier(.6,0,.2,1)", fill:"both" }
+    );
+    anim.onfinish=()=>{ wrap.style.transform=""; html.style.overflow=""; };
+  }catch(e){ document.documentElement.style.overflow=""; }
 }
 </script>
 </body>
