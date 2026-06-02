@@ -212,7 +212,7 @@ function typeCaption(el,text,ms){
       i++;
       el.textContent=prefix+str.slice(0,i);
       const ch=str[i-1];
-      if(ch&&ch!==" ") clickTick(0.06);            // subtitles: a touch more intense
+      if(ch&&ch!==" ") clickTick(0.1);             // subtitles: a touch more intense
       if(i>=str.length){ clearInterval(iv); done(); }
     }, step);
   }
@@ -259,7 +259,7 @@ fit();
 
 // ── faint typing tick (felt more than heard) ──
 let tickCtx=null;
-function clickTick(vol){
+function clickTick(vol,pan){
   try{
     if(!tickCtx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; tickCtx=new AC(); }
     const ac=tickCtx, t=ac.currentTime;
@@ -268,7 +268,9 @@ function clickTick(vol){
     const src=ac.createBufferSource(); src.buffer=b;
     const hp=ac.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=4200;
     const g=ac.createGain(); g.gain.value=vol;
-    src.connect(hp); hp.connect(g); g.connect(ac.destination);
+    let tail=g;
+    if(typeof pan==="number" && ac.createStereoPanner){ const p=ac.createStereoPanner(); p.pan.value=pan; g.connect(p); tail=p; }
+    src.connect(hp); hp.connect(g); tail.connect(ac.destination);
     src.start(t); src.stop(t+0.02);
   }catch(e){}
 }
@@ -388,12 +390,12 @@ function clickTick(vol){
     const gap=18;
     const avail=m-gap-8;
     let sides=Math.random()<.5?["L","R"]:["R","L"];
-    let placed=false,x=0;
+    let placed=false,x=0,placedSide="L";
     for(const side of sides){
       if(w>avail) continue;
       if(side==="L"){ x=8+Math.random()*(avail-w); }
       else { x=window.innerWidth-m+gap+Math.random()*(avail-w); }
-      placed=true; break;
+      placedSide=side; placed=true; break;
     }
     if(!placed){ el.remove(); return; }
     let y,tries=0;
@@ -401,11 +403,12 @@ function clickTick(vol){
     el.style.left=x+"px"; el.style.top=y+"px"; el.style.visibility="visible";
     active.add(el);
     let i=0;
+    const tickPan = placedSide==="L" ? -0.85 : 0.85;
     const typer=setInterval(()=>{
       if(i<chars.length){
         chars[i].style.opacity="1";
         const t=chars[i].textContent;
-        if(t&&t!=="\u00a0"&&Math.random()<0.55) clickTick(0.014);  // margin: barely there
+        if(t&&t!=="\u00a0"&&Math.random()<0.6) clickTick(0.032, tickPan);  // margin: quiet, panned to its side
         i++;
       }
       else{ clearInterval(typer); caret.remove(); setTimeout(crumble, 1700+Math.random()*1800); }
