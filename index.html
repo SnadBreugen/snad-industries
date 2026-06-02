@@ -14,7 +14,7 @@
     --orange:#F08020;--cyan:#2BDBE2;--magenta:#E0249A;--lime:#BFFF01;--amber:#FFB228;--mint:#00f5c4;
     --kw:#A375F7;--str:#83DD3F;--fn:#2BDBE2;--com:#5f5f57;}
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;scrollbar-gutter:stable}
   body{background:var(--bg);color:var(--fg);font-family:'Space Mono',monospace;line-height:1.6;overflow-x:hidden}
   .scan{position:fixed;inset:0;pointer-events:none;z-index:90;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px);mix-blend-mode:multiply;opacity:.35}
   #rain{position:fixed;inset:0;z-index:1;pointer-events:none}
@@ -611,7 +611,7 @@ function cinematicIntro(){
         [ { transform:"scale("+s+")" }, { transform:"scale(1)" } ],
         { duration:950, easing:"cubic-bezier(.4,0,.2,1)", fill:"both" }
       );
-      anim.onfinish=()=>{ try{anim.cancel();}catch(e){} _wrapEl.style.transform=""; _wrapEl.style.willChange=""; html.style.overflow=""; };
+      anim.onfinish=()=>{ html.style.overflow=""; setTimeout(()=>{ try{_wrapEl.style.willChange="";}catch(e){} }, 80); };
     }, 1200);   // hold the lit full overview, then zoom in to tonefall
   }catch(e){ document.documentElement.style.overflow=""; }
 }
