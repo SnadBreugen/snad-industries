@@ -684,11 +684,11 @@ function playIdleGlitch(){
       const delay=ac.createDelay(0.1); delay.delayTime.value=0.026;
       const lfo=ac.createOscillator(); lfo.frequency.value=0.9;
       const lfoG=ac.createGain(); lfoG.gain.value=0.004; lfo.connect(lfoG); lfoG.connect(delay.delayTime); lfo.start();
-      const chW=ac.createGain(); chW.gain.value=0.42; inG.connect(delay); delay.connect(chW); chW.connect(ac.destination);
+      const chW=ac.createGain(); chW.gain.value=0.22; inG.connect(delay); delay.connect(chW); chW.connect(ac.destination);
       // dezent bitcrush (amplitude quantization, no sample-rate stutter)
       const crush=ac.createWaveShaper(); const n=2048,cv=new Float32Array(n),L=Math.pow(2,5);
       for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; cv[i]=Math.round(x*L)/L; } crush.curve=cv; crush.oversample="none";
-      const crW=ac.createGain(); crW.gain.value=0.32; inG.connect(crush); crush.connect(crW); crW.connect(ac.destination);
+      const crW=ac.createGain(); crW.gain.value=0.42; inG.connect(crush); crush.connect(crW); crW.connect(ac.destination);
       // crackle / static bed
       const clen=Math.floor(ac.sampleRate*1.5), cbuf=ac.createBuffer(1,clen,ac.sampleRate), cd=cbuf.getChannelData(0);
       for(let i=0;i<clen;i++){ cd[i]=(Math.random()<0.0016)?(Math.random()*2-1)*0.8:0; }
