@@ -678,22 +678,31 @@ function playIdleGlitch(){
       const el=new Audio(src);
       const s=ac.createMediaElementSource(el);
       const inG=ac.createGain(); inG.gain.value=1; s.connect(inG);
+      // master bus: whole announcement ~30% quieter, single output
+      const master=ac.createGain(); master.gain.value=0.7; master.connect(ac.destination);
       // dry
-      const dry=ac.createGain(); dry.gain.value=0.9; inG.connect(dry); dry.connect(ac.destination);
-      // a bit more chorus (modulated short delay)
+      const dry=ac.createGain(); dry.gain.value=0.9; inG.connect(dry); dry.connect(master);
+      // chorus (modulated short delay)
       const delay=ac.createDelay(0.1); delay.delayTime.value=0.026;
       const lfo=ac.createOscillator(); lfo.frequency.value=0.9;
       const lfoG=ac.createGain(); lfoG.gain.value=0.004; lfo.connect(lfoG); lfoG.connect(delay.delayTime); lfo.start();
-      const chW=ac.createGain(); chW.gain.value=0.22; inG.connect(delay); delay.connect(chW); chW.connect(ac.destination);
+      const chW=ac.createGain(); chW.gain.value=0.22; inG.connect(delay); delay.connect(chW); chW.connect(master);
       // dezent bitcrush (amplitude quantization, no sample-rate stutter)
       const crush=ac.createWaveShaper(); const n=2048,cv=new Float32Array(n),L=Math.pow(2,5);
       for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; cv[i]=Math.round(x*L)/L; } crush.curve=cv; crush.oversample="none";
-      const crW=ac.createGain(); crW.gain.value=0.42; inG.connect(crush); crush.connect(crW); crW.connect(ac.destination);
+      const crW=ac.createGain(); crW.gain.value=0.42; inG.connect(crush); crush.connect(crW); crW.connect(master);
+      // dezent hall (short room convolver)
+      const rlen=Math.floor(ac.sampleRate*0.5), rb=ac.createBuffer(2,rlen,ac.sampleRate);
+      for(let ch=0;ch<2;ch++){ const rd=rb.getChannelData(ch); for(let i=0;i<rlen;i++){ rd[i]=(Math.random()*2-1)*Math.pow(1-i/rlen,3.0); } }
+      const conv=ac.createConvolver(); conv.buffer=rb;
+      const rW=ac.createGain(); rW.gain.value=0.15; inG.connect(conv); conv.connect(rW); rW.connect(master);
       // crackle / static bed
       const clen=Math.floor(ac.sampleRate*1.5), cbuf=ac.createBuffer(1,clen,ac.sampleRate), cd=cbuf.getChannelData(0);
       for(let i=0;i<clen;i++){ cd[i]=(Math.random()<0.0016)?(Math.random()*2-1)*0.8:0; }
       const cnode=ac.createBufferSource(); cnode.buffer=cbuf; cnode.loop=true;
-      const cg=ac.createGain(); cg.gain.value=0.11; cnode.connect(cg); cg.connect(ac.destination); cnode.start();
+      const cg=ac.createGain(); cg.gain.value=0.11; cnode.connect(cg); cg.connect(master); cnode.start();
+      // dezent duck: dip the music a touch while the PA speaks
+      try{ if(typeof on!=="undefined" && on) fadeTo(TARGET_VOL*0.8, 400); }catch(e){}
       // speech-synced brightness pulse on the page content
       const an=ac.createAnalyser(); an.fftSize=256; inG.connect(an);
       const buf=new Uint8Array(an.fftSize); const wrapEl=document.querySelector(".wrap");
@@ -710,10 +719,11 @@ function playIdleGlitch(){
         cancelAnimationFrame(raf);
         if(wrapEl) wrapEl.style.filter="";
         try{lfo.stop();}catch(e){} try{cnode.stop();}catch(e){}
+        try{ if(typeof on!=="undefined" && on) fadeTo(TARGET_VOL, 700); }catch(e){}   // music back up
       }
       el.addEventListener("ended",cleanup,{once:true});
       el.play().then(pulse).catch(cleanup);
-    }catch(e){ try{ const a=new Audio(src); a.volume=0.95; a.play().catch(()=>{}); }catch(e2){} }
+    }catch(e){ try{ const a=new Audio(src); a.volume=0.7; a.play().catch(()=>{}); }catch(e2){} }
   }
   function next(){ play(PROMOS[seq % PROMOS.length]); seq++; schedule(); }
   function schedule(){ clearTimeout(timer); const ms=(1 + Math.random()*0.5)*60*1000; timer=setTimeout(next, ms); }   // 1–1.5 min
