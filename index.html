@@ -408,7 +408,7 @@ function fadeTo(target,ms){
 }
 function start(){if(on)return;audio.volume=TARGET_VOL;audio.play().then(()=>{on=true;setIcon();}).catch(()=>{});}
 btn.addEventListener("click",e=>{e.stopPropagation();if(on){fadeTo(0,600);on=false;}else{audio.volume=0;audio.play();on=true;fadeTo(TARGET_VOL,1200);}setIcon();});
-["pointerdown","click","keydown","touchend"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
+// music starts only via the LIGHTS ON button (see starter handler below)
 setIcon();
 
 function tubeSound(){
