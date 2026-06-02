@@ -580,6 +580,23 @@ function tubeSound(){
   let mx=null,my=null,touch=false,appear=0;
   addEventListener("pointermove",e=>{ if(e.pointerType==="touch"){touch=true;return;} mx=e.clientX; my=e.clientY; },{passive:true});
   addEventListener("touchstart",()=>{touch=true;},{passive:true});
+  // banners are iframes that swallow mousemove — relay the cursor from inside them
+  function wireIframe(ifr){
+    try{
+      const win=ifr.contentWindow; if(!win) return;
+      win.addEventListener("pointermove",e=>{
+        if(e.pointerType==="touch"){touch=true;return;}
+        const fr=ifr.getBoundingClientRect();
+        const scale=fr.width/1248;            // iframe internal width
+        mx=fr.left + e.clientX*scale;
+        my=fr.top  + e.clientY*scale;
+      },{passive:true});
+    }catch(e){}
+  }
+  frames.forEach(f=>{ const ifr=f.querySelector("iframe"); if(!ifr) return;
+    try{ if(ifr.contentDocument && ifr.contentDocument.readyState==="complete") wireIframe(ifr); }catch(e){}
+    ifr.addEventListener("load",()=>wireIframe(ifr));
+  });
   function draw(x1,y1,x2,y2,col,a,t){
     const dist=Math.hypot(x2-x1,y2-y1);
     const midx=(x1+x2)/2, midy=(y1+y2)/2+Math.min(70,dist*0.12);   // gentle sag, like a hanging thread
