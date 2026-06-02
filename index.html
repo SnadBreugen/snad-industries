@@ -85,9 +85,9 @@
     100%{filter:none}
   }
   body.lightson .wrap,body.lightson #rain,body.lightson #margins{animation:tubeOn 1.1s steps(40,end) both}
-  #starter{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,rgba(6,6,6,.45),rgba(4,4,4,.72));cursor:default}
-  #starter .box{text-align:center}
-  #starter .sw{display:inline-flex;align-items:center;gap:14px;cursor:pointer;font-family:'VT323',monospace;font-size:clamp(30px,5vw,52px);letter-spacing:2px;color:#5f5f57;border:2px solid #333;padding:18px 34px;border-radius:10px;background:#0c0c0c;transition:all .2s}
+  #starter{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:flex-end;background:radial-gradient(circle at 50% 45%,rgba(6,6,6,.45),rgba(4,4,4,.72));cursor:default}
+  #starter .box{text-align:right;margin:clamp(24px,5vh,60px) clamp(24px,5vw,72px) 0 0}
+  #starter .sw{display:inline-flex;align-items:center;gap:14px;cursor:pointer;font-family:'VT323',monospace;font-size:clamp(26px,3.4vw,40px);letter-spacing:2px;color:#5f5f57;border:2px solid #333;padding:14px 26px;border-radius:10px;background:#0c0c0c;transition:all .2s}
   #starter .sw .bulb{width:16px;height:16px;border-radius:50%;background:#333;box-shadow:0 0 0 0 rgba(191,255,1,0)}
   #starter:hover .sw{color:var(--lime);border-color:var(--lime);box-shadow:0 0 24px rgba(191,255,1,.25)}
   #starter:hover .sw .bulb{background:var(--lime);box-shadow:0 0 16px 3px rgba(191,255,1,.7)}
@@ -190,8 +190,9 @@ apps.forEach(a=>{
       if(frame.dataset.played==="1") return;          // once per app
       hoverTimer=setTimeout(()=>{
         frame.dataset.played="1";
-        playVoice(a.voice);
+        playVoice(a.voice, ()=>{ frame.dataset.done="1"; });
         if(a.say) typeCaption(sayEl, a.say, Math.max(1200,(a.len||4.6)*1000-500));
+        setTimeout(()=>{ frame.dataset.done="1"; }, ((a.len||4.6)+2)*1000);  // safety if 'ended' never fires
       }, 450);
     });
     frame.addEventListener("pointerleave",()=>{ if(hoverTimer){clearTimeout(hoverTimer);hoverTimer=null;} });
@@ -242,12 +243,13 @@ function typeCaption(el,text,ms){
 let voiceArmed=false;
 
 let _voice=null;
-function playVoice(src){
+function playVoice(src,onended){
   try{
     if(_voice){ _voice.pause(); _voice=null; }
     _voice=new Audio(src); _voice.volume=0.95;
-    _voice.play().catch(()=>{});
-  }catch(e){}
+    if(onended){ _voice.addEventListener("ended",onended,{once:true}); }
+    _voice.play().catch(()=>{ if(onended) onended(); });
+  }catch(e){ if(onended) onended(); }
 }
 
 function fit(){
@@ -595,7 +597,7 @@ function tubeSound(){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     if(window.__tourReady && !touch && mx!=null){
       let ti=-1;
-      for(let i=0;i<frames.length;i++){ if(frames[i].dataset.played!=="1"){ ti=i; break; } }
+      for(let i=0;i<frames.length;i++){ if(frames[i].dataset.done!=="1"){ ti=i; break; } }
       if(ti>=0){
         appear=Math.min(1,appear+0.04);
         const r=frames[ti].getBoundingClientRect();
