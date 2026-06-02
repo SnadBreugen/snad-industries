@@ -285,8 +285,7 @@ function marginPip(pan){
     if(!tickCtx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; tickCtx=new AC(); }
     const ac=tickCtx, t=ac.currentTime;
     const osc=ac.createOscillator(); osc.type="sine";
-    const notes=[1568,1760,2093,2349,2637];        // high, datastream-like, varied
-    osc.frequency.value=notes[(Math.random()*notes.length)|0];
+    osc.frequency.value=4186;                       // fixed tone, one octave up
     const g=ac.createGain();
     g.gain.setValueAtTime(0.0001,t);
     g.gain.exponentialRampToValueAtTime(0.04,t+0.004);   // very quiet
