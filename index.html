@@ -666,27 +666,45 @@ function playIdleGlitch(){
   }catch(e){}
 }
 
-// ── periodic promo announcements: random, no direct repeat, no ducking, voice only ──
+// ── periodic promo announcements: random, no direct repeat, louder + glitched, voice only ──
 (function(){
   const PROMOS=["voice-promo-1.mp3","voice-promo-2.mp3","voice-promo-3.mp3","voice-promo-4.mp3","voice-promo-5.mp3"];
-  let armed=false, last=-1, timer=null, cur=null;
+  let armed=false, last=-1, timer=null, pctx=null;
+  function ctx(){ if(!pctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; pctx=new AC(); } if(pctx.state==="suspended") pctx.resume(); return pctx; }
+  function play(src){
+    const ac=ctx();
+    if(!ac){ try{ const a=new Audio(src); a.volume=1; a.play().catch(()=>{}); }catch(e){} return; }
+    try{
+      const el=new Audio(src);
+      const s=ac.createMediaElementSource(el);
+      const g=ac.createGain(); g.gain.value=0.95;        // normal level (no boost)
+      const ws=ac.createWaveShaper(); const n=1024,c=new Float32Array(n),k=5;
+      for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); } ws.curve=c; ws.oversample="2x";
+      const wet=ac.createGain(); wet.gain.value=0.16;     // a hair of grit
+      s.connect(g); g.connect(ac.destination); g.connect(ws); ws.connect(wet); wet.connect(ac.destination);
+      el.play().then(()=>{
+        const dur=el.duration||3, t0=ac.currentTime, base=0.95;
+        const drops=2+Math.floor(Math.random()*2);        // 2–3 dezent dropouts
+        for(let i=0;i<drops;i++){
+          const t=t0+0.2+Math.random()*Math.max(0.4,dur-0.5);
+          const len=0.02+Math.random()*0.03;
+          g.gain.setValueAtTime(base,t); g.gain.setValueAtTime(0,t+0.001); g.gain.setValueAtTime(base,t+len);
+        }
+      }).catch(()=>{});
+    }catch(e){ try{ const a=new Audio(src); a.volume=1; a.play().catch(()=>{}); }catch(e2){} }
+  }
   function next(){
     let i; do{ i=Math.floor(Math.random()*PROMOS.length); }while(i===last && PROMOS.length>1);
-    last=i;
-    try{
-      if(cur){ try{cur.pause();}catch(e){} }
-      cur=new Audio(PROMOS[i]); cur.volume=0.8;     // sits in the mix, no ducking
-      cur.play().catch(()=>{});
-    }catch(e){}
-    schedule();
+    last=i; play(PROMOS[i]); schedule();
   }
-  function schedule(){
-    clearTimeout(timer);
-    const ms=(2.5 + Math.random()*0.5)*60*1000;      // 2.5–3 min
-    timer=setTimeout(next, ms);
-  }
-  // armed once the first app voice has finished; first promo 10s later
-  window.__armPromos=function(){ if(armed) return; armed=true; clearTimeout(timer); timer=setTimeout(next, 10000); };
+  function schedule(){ clearTimeout(timer); const ms=(2.5 + Math.random()*0.5)*60*1000; timer=setTimeout(next, ms); }   // 2.5–3 min
+  // only fires once ALL five app voices have finished; first promo 10s after the last one
+  window.__armPromos=function(){
+    if(armed) return;
+    const frames=[...document.querySelectorAll(".frame")];
+    if(!frames.length || !frames.every(f=>f.dataset.done==="1")) return;
+    armed=true; clearTimeout(timer); timer=setTimeout(next, 10000);
+  };
 })();
 
 const starter=document.getElementById("starter");
