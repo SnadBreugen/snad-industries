@@ -66,7 +66,7 @@
 
   /* frozen/dark state until lights on */
   body.frozen *{animation-play-state:paused!important}
-  body.frozen .wrap,body.frozen #rain,body.frozen #margins{filter:grayscale(.85) brightness(.42);transition:filter .9s ease}
+  body.frozen .wrap,body.frozen #margins{filter:grayscale(.85) brightness(.42);transition:filter .9s ease}
   .wrap,#rain,#margins{transition:filter .9s ease}
   @media (min-width:820px) and (prefers-reduced-motion: no-preference){
     body.frozen .wrap{ transform:scale(.18); transform-origin:50% 0; }
@@ -457,7 +457,7 @@ function marginPip(pan){
     if(Math.random()<0.25) setTimeout(spawn, 500+Math.random()*700); // sometimes a third
     setTimeout(loop, 500+Math.random()*1700); // sporadic, unpredictable, busier
   }
-  if(window.innerWidth>1380){ setTimeout(loop, 900); }
+  window.__startMargins=function(){ if(window.innerWidth>1380){ setTimeout(loop, 900); } };
   window.addEventListener("resize",()=>{ if(window.innerWidth<=1380){active.forEach(e=>e.remove());active.clear();} });
 })();
 
@@ -636,13 +636,19 @@ document.querySelectorAll(".frame iframe").forEach(ifr=>{
 const starter=document.getElementById("starter");
 if(starter){
   const sw=starter.querySelector(".sw");
+  // if the visitor hasn't switched the lights on after 10s, the PA tries to nudge them
+  let idleTimer=setTimeout(()=>{
+    try{ const a=new Audio("voice-idle.mp3"); a.volume=0.9; a.play().catch(()=>{}); }catch(e){}
+  }, 10000);
   (sw||starter).addEventListener("click",(e)=>{
     e.stopPropagation();
+    clearTimeout(idleTimer);
     tubeSound();
     _releaseAll();
     document.body.classList.remove("frozen");
     document.body.classList.add("lightson");
     start();
+    if(window.__startMargins) window.__startMargins();   // margin code lines begin only now
     starter.classList.add("hide");
     setTimeout(()=>starter.remove(),700);
     setTimeout(()=>document.body.classList.remove("lightson"),1300);
