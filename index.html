@@ -162,18 +162,18 @@ fit();
   resize(); addEventListener("resize",resize);
   const P=[];
   function spawn(){
-    const fast=Math.random()<0.4;
-    const sp=(fast?5:1.6)+Math.random()*(fast?4:1.4);
+    const fast=Math.random()<0.55;
+    const sp=(fast?6:1.8)+Math.random()*(fast?5:1.6);
     P.push({
       x:Math.random()*W, y:-10*dpr,
-      vx:((Math.random()-.5)*1.2)*dpr, vy:sp*dpr,
-      s:(fast?2:2)*dpr, col:COLS[(Math.random()*COLS.length)|0],
-      trail:fast?7:3, a:fast?0.9:0.5
+      vx:((Math.random()-.5)*1.4)*dpr, vy:sp*dpr,
+      s:(fast?3:2)*dpr, col:COLS[(Math.random()*COLS.length)|0],
+      trail:fast?12:4, a:fast?1:0.6
     });
   }
   function frame(){
     ctx.clearRect(0,0,W,H);
-    if(P.length<28 && Math.random()<0.10) spawn();
+    if(P.length<46 && Math.random()<0.18) spawn();
     for(let i=P.length-1;i>=0;i--){
       const p=P[i];
       p.x+=p.vx; p.y+=p.vy;
@@ -205,6 +205,8 @@ fit();
     [["var","github"],["op"," = "],["str","\"SnadBreugen\""]],
     [["var","apps"],["prop",".length"],["op"," += "],["num","1"],["com","  // and counting"]],
     [["var","soundtrack"],["op"," = "],["str","\"Morast\""]],
+    [["var","morast"],["prop",".made_with"],["op"," = "],["str","\"audiotool synths + fx only\""]],
+    [["com","// morast: no samples, no drum machines"]],
     [["var","tonefall"],["prop",".builds"],["op"," = "],["str","\"0.5 → 0.9.7\""]],
     [["var","tonefall"],["prop",".grid"],["op"," = "],["str","\"16 × 16\""]],
     [["var","tonefall"],["prop",".voice"],["op"," = "],["str","\"8-bit chiptune\""]],
@@ -233,7 +235,7 @@ fit();
     [["var","os"],["op"," = "],["str","\"windows + vscode\""]],
     [["com","// tells you what he does NOT want"]],
     [["com","// secretly detail-oriented"]],
-    [["var","location"],["op"," = "],["str","\"Berlin\""]],
+    [["var","location"],["op"," = "],["str","\"Germany\""]],
     [["var","sandburgen"],["prop",".tracks"],["op"," = "],["num","470"]],
     [["com","// fragments. DE + EN. no fluff"]],
     [["var","github"],["prop",".user"],["op"," = "],["str","\"SnadBreugen\""],["com","  // capital B"]]
@@ -262,11 +264,17 @@ fit();
     el.style.visibility="hidden"; layer.appendChild(el);
     const w=el.getBoundingClientRect().width;
     const m=margin();
-    const side=Math.random()<.5?"L":"R";
-    const pad=16;
-    let x;
-    if(side==="L"){ x=pad+Math.random()*Math.max(4,(m-w-pad-8)); }
-    else { x=window.innerWidth-m+pad+Math.random()*Math.max(4,(m-w-pad-8)); if(x+w>window.innerWidth-8)x=window.innerWidth-8-w; }
+    const gap=18;
+    const avail=m-gap-8;
+    let sides=Math.random()<.5?["L","R"]:["R","L"];
+    let placed=false,x=0;
+    for(const side of sides){
+      if(w>avail) continue;
+      if(side==="L"){ x=8+Math.random()*(avail-w); }
+      else { x=window.innerWidth-m+gap+Math.random()*(avail-w); }
+      placed=true; break;
+    }
+    if(!placed){ el.remove(); return; }
     let y,tries=0;
     do{ y=window.innerHeight*(0.10+Math.random()*0.78); tries++; }while(overlaps(y,16)&&tries<8);
     el.style.left=x+"px"; el.style.top=y+"px"; el.style.visibility="visible";
@@ -302,9 +310,21 @@ const btn=document.getElementById("snd");
 const np=document.querySelector(".nowplaying");
 let on=false;
 function setIcon(){btn.innerHTML=on?"&#9834;":"&#10005;";btn.style.color=on?"var(--cyan)":"var(--dim)";np.style.opacity=on?"1":".4";}
-function start(){if(on)return;audio.volume=.5;audio.play().then(()=>{on=true;setIcon();}).catch(()=>{});}
-btn.addEventListener("click",e=>{e.stopPropagation();if(on){audio.pause();on=false;}else{audio.play();on=true;}setIcon();});
-["click","scroll","keydown","touchstart"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
+const TARGET_VOL=0.5;
+let fadeTimer=null;
+function fadeTo(target,ms){
+  if(fadeTimer)clearInterval(fadeTimer);
+  const steps=Math.max(1,Math.round(ms/40));
+  const start=audio.volume, delta=(target-start)/steps;
+  let i=0;
+  fadeTimer=setInterval(()=>{
+    i++; audio.volume=Math.min(1,Math.max(0,start+delta*i));
+    if(i>=steps){clearInterval(fadeTimer);fadeTimer=null;audio.volume=target; if(target===0)audio.pause();}
+  },40);
+}
+function start(){if(on)return;audio.volume=0;audio.play().then(()=>{on=true;setIcon();fadeTo(TARGET_VOL,2500);}).catch(()=>{});}
+btn.addEventListener("click",e=>{e.stopPropagation();if(on){fadeTo(0,600);on=false;}else{audio.volume=0;audio.play();on=true;fadeTo(TARGET_VOL,1200);}setIcon();});
+["mousemove","pointerdown","click","scroll","keydown","touchstart"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
 setIcon();
 </script>
 </body>
