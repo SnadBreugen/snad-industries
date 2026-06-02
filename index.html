@@ -627,30 +627,10 @@ function tubeSound(){
   requestAnimationFrame(loop);
 })();
 
-// ── freeze the banner iframes until LIGHTS ON (they animate independently of the page) ──
-function _gripFreeze(ifr, frozen){
-  try{
-    const win=ifr.contentWindow; if(!win) return;
-    if(!win.__gripped){
-      win.__gripped=true; win.__pendingRAF=null;
-      win.__realRAF=win.requestAnimationFrame.bind(win);
-      win.requestAnimationFrame=function(cb){ if(win.__frozen){ win.__pendingRAF=cb; return 0; } return win.__realRAF(cb); };
-    }
-    win.__frozen=frozen;
-    const d=ifr.contentDocument;
-    if(d){
-      let s=d.getElementById("__freeze");
-      if(frozen){ if(!s){ s=d.createElement("style"); s.id="__freeze"; s.textContent="*{animation-play-state:paused!important}"; (d.head||d.documentElement).appendChild(s); } }
-      else if(s){ s.remove(); }
-    }
-    if(!frozen && win.__pendingRAF){ const cb=win.__pendingRAF; win.__pendingRAF=null; win.__realRAF(cb); }
-  }catch(e){}
-}
-function _freezeAll(frozen){ document.querySelectorAll(".frame iframe").forEach(ifr=>_gripFreeze(ifr,frozen)); }
+// ── banners freeze themselves on load; release them on LIGHTS ON via postMessage ──
+function _releaseAll(){ document.querySelectorAll(".frame iframe").forEach(ifr=>{ try{ ifr.contentWindow.postMessage("snad:play","*"); }catch(e){} }); }
 document.querySelectorAll(".frame iframe").forEach(ifr=>{
-  const apply=()=>_gripFreeze(ifr, document.body.classList.contains("frozen"));
-  try{ if(ifr.contentDocument && ifr.contentDocument.readyState==="complete") apply(); }catch(e){}
-  ifr.addEventListener("load", apply);
+  ifr.addEventListener("load",()=>{ if(!document.body.classList.contains("frozen")){ try{ ifr.contentWindow.postMessage("snad:play","*"); }catch(e){} } });
 });
 
 const starter=document.getElementById("starter");
@@ -659,7 +639,7 @@ if(starter){
   (sw||starter).addEventListener("click",(e)=>{
     e.stopPropagation();
     tubeSound();
-    _freezeAll(false);
+    _releaseAll();
     document.body.classList.remove("frozen");
     document.body.classList.add("lightson");
     start();
