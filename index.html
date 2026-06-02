@@ -666,44 +666,63 @@ function playIdleGlitch(){
   }catch(e){}
 }
 
-// ── periodic promo announcements: random, no direct repeat, louder + glitched, voice only ──
+// ── periodic promo announcements: fixed order, app-level volume, chorus+bitcrush+crackle, speech-synced light pulse ──
 (function(){
   const PROMOS=["voice-promo-1.mp3","voice-promo-2.mp3","voice-promo-3.mp3","voice-promo-4.mp3","voice-promo-5.mp3"];
-  let armed=false, last=-1, timer=null, pctx=null;
+  let armed=false, seq=0, timer=null, pctx=null;
   function ctx(){ if(!pctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; pctx=new AC(); } if(pctx.state==="suspended") pctx.resume(); return pctx; }
   function play(src){
     const ac=ctx();
-    if(!ac){ try{ const a=new Audio(src); a.volume=1; a.play().catch(()=>{}); }catch(e){} return; }
+    if(!ac){ try{ const a=new Audio(src); a.volume=0.95; a.play().catch(()=>{}); }catch(e){} return; }
     try{
       const el=new Audio(src);
       const s=ac.createMediaElementSource(el);
-      const g=ac.createGain(); g.gain.value=0.95;        // normal level (no boost)
-      const ws=ac.createWaveShaper(); const n=1024,c=new Float32Array(n),k=5;
-      for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); } ws.curve=c; ws.oversample="2x";
-      const wet=ac.createGain(); wet.gain.value=0.16;     // a hair of grit
-      s.connect(g); g.connect(ac.destination); g.connect(ws); ws.connect(wet); wet.connect(ac.destination);
-      el.play().then(()=>{
-        const dur=el.duration||3, t0=ac.currentTime, base=0.95;
-        const drops=2+Math.floor(Math.random()*2);        // 2–3 dezent dropouts
-        for(let i=0;i<drops;i++){
-          const t=t0+0.2+Math.random()*Math.max(0.4,dur-0.5);
-          const len=0.02+Math.random()*0.03;
-          g.gain.setValueAtTime(base,t); g.gain.setValueAtTime(0,t+0.001); g.gain.setValueAtTime(base,t+len);
-        }
-      }).catch(()=>{});
-    }catch(e){ try{ const a=new Audio(src); a.volume=1; a.play().catch(()=>{}); }catch(e2){} }
+      const inG=ac.createGain(); inG.gain.value=1; s.connect(inG);
+      // dry
+      const dry=ac.createGain(); dry.gain.value=0.9; inG.connect(dry); dry.connect(ac.destination);
+      // a bit more chorus (modulated short delay)
+      const delay=ac.createDelay(0.1); delay.delayTime.value=0.026;
+      const lfo=ac.createOscillator(); lfo.frequency.value=0.9;
+      const lfoG=ac.createGain(); lfoG.gain.value=0.004; lfo.connect(lfoG); lfoG.connect(delay.delayTime); lfo.start();
+      const chW=ac.createGain(); chW.gain.value=0.42; inG.connect(delay); delay.connect(chW); chW.connect(ac.destination);
+      // dezent bitcrush (amplitude quantization, no sample-rate stutter)
+      const crush=ac.createWaveShaper(); const n=2048,cv=new Float32Array(n),L=Math.pow(2,5);
+      for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; cv[i]=Math.round(x*L)/L; } crush.curve=cv; crush.oversample="none";
+      const crW=ac.createGain(); crW.gain.value=0.32; inG.connect(crush); crush.connect(crW); crW.connect(ac.destination);
+      // crackle / static bed
+      const clen=Math.floor(ac.sampleRate*1.5), cbuf=ac.createBuffer(1,clen,ac.sampleRate), cd=cbuf.getChannelData(0);
+      for(let i=0;i<clen;i++){ cd[i]=(Math.random()<0.0016)?(Math.random()*2-1)*0.8:0; }
+      const cnode=ac.createBufferSource(); cnode.buffer=cbuf; cnode.loop=true;
+      const cg=ac.createGain(); cg.gain.value=0.11; cnode.connect(cg); cg.connect(ac.destination); cnode.start();
+      // speech-synced brightness pulse on the page content
+      const an=ac.createAnalyser(); an.fftSize=256; inG.connect(an);
+      const buf=new Uint8Array(an.fftSize); const wrapEl=document.querySelector(".wrap");
+      let raf=0;
+      function pulse(){
+        an.getByteTimeDomainData(buf);
+        let sum=0; for(let i=0;i<buf.length;i++){ const v=(buf[i]-128)/128; sum+=v*v; }
+        const rms=Math.sqrt(sum/buf.length);
+        const b=1 + Math.min(0.12, rms*0.6);     // subtle: 1.00 … ~1.12
+        if(wrapEl) wrapEl.style.filter="brightness("+b.toFixed(3)+")";
+        raf=requestAnimationFrame(pulse);
+      }
+      function cleanup(){
+        cancelAnimationFrame(raf);
+        if(wrapEl) wrapEl.style.filter="";
+        try{lfo.stop();}catch(e){} try{cnode.stop();}catch(e){}
+      }
+      el.addEventListener("ended",cleanup,{once:true});
+      el.play().then(pulse).catch(cleanup);
+    }catch(e){ try{ const a=new Audio(src); a.volume=0.95; a.play().catch(()=>{}); }catch(e2){} }
   }
-  function next(){
-    let i; do{ i=Math.floor(Math.random()*PROMOS.length); }while(i===last && PROMOS.length>1);
-    last=i; play(PROMOS[i]); schedule();
-  }
-  function schedule(){ clearTimeout(timer); const ms=(2.5 + Math.random()*0.5)*60*1000; timer=setTimeout(next, ms); }   // 2.5–3 min
+  function next(){ play(PROMOS[seq % PROMOS.length]); seq++; schedule(); }
+  function schedule(){ clearTimeout(timer); const ms=(1 + Math.random()*0.5)*60*1000; timer=setTimeout(next, ms); }   // 1–1.5 min
   // only fires once ALL five app voices have finished; first promo 10s after the last one
   window.__armPromos=function(){
     if(armed) return;
     const frames=[...document.querySelectorAll(".frame")];
     if(!frames.length || !frames.every(f=>f.dataset.done==="1")) return;
-    armed=true; clearTimeout(timer); timer=setTimeout(next, 10000);
+    armed=true; clearTimeout(timer); timer=setTimeout(next, 5000);
   };
 })();
 
