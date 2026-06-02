@@ -59,7 +59,7 @@
   @media(prefers-reduced-motion:reduce){.scan{display:none}}
 
   #margins{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
-  .snip{position:fixed;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.5px;white-space:nowrap;color:#6a6a60;text-shadow:0 0 8px rgba(0,0,0,.6)}
+  .snip{position:fixed;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.3px;white-space:nowrap;color:#7CFC6A;text-shadow:0 1px 3px rgba(0,0,0,.7)}
   .snip .c{opacity:0;display:inline-block;will-change:transform,opacity}
   .snip.type .c{opacity:1}
   .snip .caret{display:inline-block;width:7px;height:14px;background:currentColor;margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
@@ -87,14 +87,14 @@
   toys and tools, each built to
   do one thing and do it well.`</span>;
 }
-<span class="com">// 5 modules &middot; made by Snad Breugen</span></div>
+<span class="com">// a growing set of modules &middot; made by Snad Breugen</span></div>
     <div class="leadnote">Browser tools that plug into <b>Audiotool</b> through the Nexus SDK. Click any module to open it. Soundtrack: <b>Morast by Sandburgen</b>.</div>
   </section>
 
   <div id="apps"></div>
 
   <footer>
-    <div>SNAD.INDUSTRIES v1.0.0 &nbsp;//&nbsp; 5 modules loaded</div>
+    <div>SNAD.INDUSTRIES v1.0.0 &nbsp;//&nbsp; modules loaded</div>
     <div><a href="https://www.audiotool.com/user/sandburgen" target="_blank" rel="noopener">audiotool.com/user/sandburgen</a></div>
   </footer>
 </div>
@@ -150,67 +150,110 @@ window.addEventListener("resize",fit);
 window.addEventListener("load",fit);
 fit();
 
-// ── margin code snippets: type in, hold, crumble ──
+// ── margin code snippets: syntax-coloured, type in, hold, crumble ──
 (function(){
   const layer=document.getElementById("margins");
+  const COL={kw:"#b78cff",str:"#7CFC6A",num:"#FF9D42",prop:"#3CE0E8",fn:"#FFE14D",var:"#7CFC6A",com:"#3CE0E8",op:"#c7c5bc"};
+  // each line = array of [kind, text] tokens. all from real facts.
   const LINES=[
-    {t:"// one grumpy old man who never planned to build an app",c:"#8d8b82"},
-    {t:"// best on desktop, not on your phone",c:"#6a6a60"},
-    {t:"// built with typescript + the nexus sdk",c:"#6a6a60"},
-    {t:"tonefall: builds 0.5 → 0.9.7",c:"#FFB228"},
-    {t:"pack midi: v3.0",c:"#F08020"},
-    {t:"at vault: v0.5.2",c:"#BFFF01"},
-    {t:"the color guy: 42 colours",c:"#2BDBE2"},
-    {t:"matrix evolutions: 4-bar piano roll",c:"#E0249A"},
-    {t:"// five apps, one maker",c:"#8d8b82"}
+    [["kw","const "],["var","maker"],["op"," = "],["str","\"one grumpy old man\""],["com","  // never planned this"]],
+    [["com","// best on desktop, not on your phone"]],
+    [["com","// no frameworks. just the sdk"]],
+    [["kw","import"],["op"," { "],["var","nexus"],["op"," } "],["kw","from"],["op"," "],["str","\"@audiotool/nexus\""]],
+    [["kw","const "],["var","stack"],["op"," = ["],["str","\"typescript\""],["op",", "],["str","\"vite\""],["op","]"]],
+    [["fn","deploy"],["op","("],["str","\"gh-pages\""],["op",")"],["com","  // npm run deploy"]],
+    [["var","github"],["op"," = "],["str","\"SnadBreugen\""]],
+    [["var","apps"],["prop",".length"],["op"," += "],["num","1"],["com","  // and counting"]],
+    [["var","soundtrack"],["op"," = "],["str","\"Morast\""]],
+    [["var","tonefall"],["prop",".builds"],["op"," = "],["str","\"0.5 → 0.9.7\""]],
+    [["var","tonefall"],["prop",".grid"],["op"," = "],["str","\"16 × 16\""]],
+    [["var","tonefall"],["prop",".voice"],["op"," = "],["str","\"8-bit chiptune\""]],
+    [["var","tonefall"],["prop",".export"],["op"," = ["],["str","\"midi\""],["op",","],["str","\"tonematrix\""],["op",","],["str","\"audio\""],["op","]"]],
+    [["var","packmidi"],["prop",".version"],["op"," = "],["str","\"3.0\""]],
+    [["var","packmidi"],["prop",".drums"],["op"," = "],["str","\"machiniste → GM\""]],
+    [["var","matrix"],["prop",".region"],["op"," = "],["str","\"4 bars\""]],
+    [["var","matrix"],["prop",".dirs"],["op"," = ["],["str","\"up\""],["op",","],["str","\"down\""],["op",","],["str","\"zigzag\""],["op",","],["str","\"random\""],["op","]"]],
+    [["var","matrix"],["prop",".rate"],["op"," = ["],["str","\"1/4\""],["op",","],["str","\"1/8\""],["op",","],["str","\"1/16\""],["op",","],["str","\"1/32\""],["op","]"]],
+    [["var","colorguy"],["prop",".palette"],["op"," = "],["num","42"],["com","  // colours"]],
+    [["var","colorguy"],["prop",".groups"],["op"," = ["],["str","\"synths\""],["op",","],["str","\"drums\""],["op",","],["str","\"audio\""],["op",","],["str","\"vst\""],["op","]"]],
+    [["var","atvault"],["prop",".version"],["op"," = "],["str","\"0.5.2\""]],
+    [["var","atvault"],["prop",".does"],["op"," = "],["str","\"export ⇄ import\""]],
+    [["kw","if "],["op","("],["var","device"],["op"," === "],["str","\"phone\""],["op",") "],["kw","return"],["op",";"],["com","  // sorry"]],
+    [["kw","if "],["op","(!"],["var","go"],["op",") "],["kw","return"],["op",";"],["com","  // no go, no code"]],
+    [["var","rule"],["op"," = "],["str","\"always paste the full code\""]],
+    [["var","prefers"],["op"," = "],["str","\"copy-paste over terminal\""]],
+    [["var","statusbar"],["prop",".version"],["op"," = "],["kw","true"],["com","  // always visible"]],
+    [["var","design"],["prop",".first"],["op"," = "],["str","\"preview, then build\""]],
+    [["var","lang"],["prop",".dutch"],["op"," = "],["kw","false"],["com","  // never"]],
+    [["var","flow"],["op"," = "],["str","\"one step at a time\""]],
+    [["var","feedback"],["op"," = "],["str","\"honest, no fallbacks\""]],
+    [["com","// codophobia — handle with care"]],
+    [["var","brand"],["prop",".colour"],["op"," = "],["str","\"turquoise\""]],
+    [["var","orange"],["op"," = "],["str","\"already taken\""]],
+    [["var","os"],["op"," = "],["str","\"windows + vscode\""]],
+    [["com","// tells you what he does NOT want"]],
+    [["com","// secretly detail-oriented"]],
+    [["var","location"],["op"," = "],["str","\"Berlin\""]],
+    [["var","sandburgen"],["prop",".tracks"],["op"," = "],["num","470"]],
+    [["com","// fragments. DE + EN. no fluff"]],
+    [["var","github"],["prop",".user"],["op"," = "],["str","\"SnadBreugen\""],["com","  // capital B"]]
   ];
-  let order=[],oi=0;
-  function nextLine(){ if(oi>=order.length){order=[...LINES].sort(()=>Math.random()-.5);oi=0;} return order[oi++]; }
+  let bag=[];
+  function nextLine(){ if(!bag.length){bag=[...LINES].sort(()=>Math.random()-.5);} return bag.pop(); }
   const active=new Set();
   function margin(){ return (window.innerWidth-1100)/2; }
+  function overlaps(y,h){ for(const e of active){ const r=e.getBoundingClientRect(); if(Math.abs(r.top-y)<h+10) return true; } return false; }
   function spawn(){
-    if(window.innerWidth<=1380){return;}
-    if(active.size>=3){return;}
+    if(window.innerWidth<=1380) return;
+    if(active.size>=6) return;
     const L=nextLine();
     const el=document.createElement("div");
-    el.className="snip"; el.style.color=L.c;
-    L.t.split("").forEach(ch=>{
-      const s=document.createElement("span"); s.className="c"; s.textContent=ch===" "?"\u00a0":ch; el.appendChild(s);
+    el.className="snip";
+    const chars=[];
+    L.forEach(tok=>{
+      const col=COL[tok[0]]||COL.var;
+      [...tok[1]].forEach(ch=>{
+        const s=document.createElement("span"); s.className="c"; s.style.color=col;
+        if(tok[0]==="com") s.style.fontStyle="italic";
+        s.textContent=ch===" "?"\u00a0":ch; el.appendChild(s); chars.push(s);
+      });
     });
     const caret=document.createElement("span"); caret.className="caret"; el.appendChild(caret);
-    layer.appendChild(el);
-    // position in a side margin
+    el.style.visibility="hidden"; layer.appendChild(el);
     const w=el.getBoundingClientRect().width;
     const m=margin();
     const side=Math.random()<.5?"L":"R";
-    const pad=18;
+    const pad=16;
     let x;
-    if(side==="L"){ x=pad+Math.random()*Math.max(4,(m-w-pad-10)); }
-    else { x=window.innerWidth-m+pad+Math.random()*Math.max(4,(m-w-pad-10)); if(x+w>window.innerWidth-8)x=window.innerWidth-8-w; }
-    const y=window.innerHeight*(0.14+Math.random()*0.68);
-    el.style.left=x+"px"; el.style.top=y+"px";
+    if(side==="L"){ x=pad+Math.random()*Math.max(4,(m-w-pad-8)); }
+    else { x=window.innerWidth-m+pad+Math.random()*Math.max(4,(m-w-pad-8)); if(x+w>window.innerWidth-8)x=window.innerWidth-8-w; }
+    let y,tries=0;
+    do{ y=window.innerHeight*(0.10+Math.random()*0.78); tries++; }while(overlaps(y,16)&&tries<8);
+    el.style.left=x+"px"; el.style.top=y+"px"; el.style.visibility="visible";
     active.add(el);
-    const chars=[...el.querySelectorAll(".c")];
-    // type
     let i=0;
     const typer=setInterval(()=>{
       if(i<chars.length){chars[i].style.opacity="1";i++;}
-      else{ clearInterval(typer); caret.remove(); setTimeout(crumble, 1900+Math.random()*1400); }
-    }, 32+Math.random()*22);
+      else{ clearInterval(typer); caret.remove(); setTimeout(crumble, 1700+Math.random()*1800); }
+    }, 28+Math.random()*26);
     function crumble(){
       chars.forEach((c,idx)=>{
         setTimeout(()=>{
           c.style.transition="transform .7s ease, opacity .7s ease, filter .7s ease";
-          c.style.transform=`translate(${(Math.random()-.5)*26}px, ${10+Math.random()*26}px) rotate(${(Math.random()-.5)*50}deg)`;
-          c.style.filter="blur(2px)";
-          c.style.opacity="0";
-        }, idx*14);
+          c.style.transform=`translate(${(Math.random()-.5)*28}px, ${10+Math.random()*28}px) rotate(${(Math.random()-.5)*55}deg)`;
+          c.style.filter="blur(2px)"; c.style.opacity="0";
+        }, idx*13);
       });
-      setTimeout(()=>{active.delete(el); el.remove();}, chars.length*14+800);
+      setTimeout(()=>{active.delete(el); el.remove();}, chars.length*13+850);
     }
   }
-  function loop(){ spawn(); setTimeout(loop, 1400+Math.random()*1800); }
-  if(window.innerWidth>1380){ setTimeout(loop, 1200); }
+  function loop(){
+    spawn();
+    if(Math.random()<0.5) setTimeout(spawn, 180+Math.random()*420); // frequent clusters
+    if(Math.random()<0.25) setTimeout(spawn, 500+Math.random()*700); // sometimes a third
+    setTimeout(loop, 500+Math.random()*1700); // sporadic, unpredictable, busier
+  }
+  if(window.innerWidth>1380){ setTimeout(loop, 900); }
   window.addEventListener("resize",()=>{ if(window.innerWidth<=1380){active.forEach(e=>e.remove());active.clear();} });
 })();
 
