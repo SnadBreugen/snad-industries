@@ -561,6 +561,53 @@ function tubeSound(){
   }catch(e){}
 }
 
+// ── guided thread tour: a thin glowing thread from the cursor to the next banner ──
+(function(){
+  const frames=[...document.querySelectorAll(".frame")];
+  if(!frames.length) return;
+  const cv=document.createElement("canvas");
+  cv.id="thread"; cv.setAttribute("aria-hidden","true");
+  cv.style.cssText="position:fixed;inset:0;z-index:92;pointer-events:none";
+  document.body.appendChild(cv);
+  const ctx=cv.getContext("2d");
+  let dpr;
+  function resize(){ dpr=Math.min(2,window.devicePixelRatio||1); cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; cv.style.width=innerWidth+"px"; cv.style.height=innerHeight+"px"; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  resize(); addEventListener("resize",resize);
+  const cssVar=v=>{ try{return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#f2efe6";}catch(e){return "#f2efe6";} };
+  const colors=(typeof apps!=="undefined") ? apps.map(a=>cssVar(a.ac)) : frames.map(()=>"#f2efe6");
+  let mx=null,my=null,touch=false,appear=0;
+  addEventListener("pointermove",e=>{ if(e.pointerType==="touch"){touch=true;return;} mx=e.clientX; my=e.clientY; },{passive:true});
+  addEventListener("touchstart",()=>{touch=true;},{passive:true});
+  function draw(x1,y1,x2,y2,col,a,t){
+    const dist=Math.hypot(x2-x1,y2-y1);
+    const midx=(x1+x2)/2, midy=(y1+y2)/2+Math.min(70,dist*0.12);   // gentle sag, like a hanging thread
+    const shimmer=0.42+0.22*Math.sin(t/320);
+    ctx.save();
+    ctx.globalAlpha=a*shimmer; ctx.strokeStyle=col; ctx.lineWidth=1; ctx.shadowColor=col; ctx.shadowBlur=7;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.quadraticCurveTo(midx,midy,x2,y2); ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha=a*(0.45+0.45*Math.sin(t/240)); ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=12;
+    ctx.beginPath(); ctx.arc(x2,y2,2.4,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  function loop(t){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    if(window.__tourReady && !touch && mx!=null){
+      let ti=-1;
+      for(let i=0;i<frames.length;i++){ if(frames[i].dataset.played!=="1"){ ti=i; break; } }
+      if(ti>=0){
+        appear=Math.min(1,appear+0.04);
+        const r=frames[ti].getBoundingClientRect();
+        const tx=r.left+r.width/2, ty=r.top+r.height*0.4;
+        draw(mx,my,tx,ty,colors[ti],appear,t);
+      } else { appear=0; }
+    } else { appear=Math.max(0,appear-0.06); }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
 const starter=document.getElementById("starter");
 if(starter){
   const sw=starter.querySelector(".sw");
@@ -611,7 +658,7 @@ function cinematicIntro(){
         [ { transform:"scale("+s+")" }, { transform:"scale(1)" } ],
         { duration:950, easing:"cubic-bezier(.4,0,.2,1)", fill:"both" }
       );
-      anim.onfinish=()=>{ html.style.overflow=""; setTimeout(()=>{ try{_wrapEl.style.willChange="";}catch(e){} }, 80); };
+      anim.onfinish=()=>{ html.style.overflow=""; window.__tourReady=true; setTimeout(()=>{ try{_wrapEl.style.willChange="";}catch(e){} }, 80); };
     }, 1200);   // hold the lit full overview, then zoom in to tonefall
   }catch(e){ document.documentElement.style.overflow=""; }
 }
