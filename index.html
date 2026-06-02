@@ -69,7 +69,7 @@
   body.frozen .wrap,body.frozen #rain,body.frozen #margins{filter:grayscale(.85) brightness(.42);transition:filter .9s ease}
   .wrap,#rain,#margins{transition:filter .9s ease}
   @media (min-width:820px) and (prefers-reduced-motion: no-preference){
-    body.frozen .wrap{ transform:scale(.5); transform-origin:50% 0; }
+    body.frozen .wrap{ transform:scale(.18); transform-origin:50% 0; }
   }
   @keyframes tubeOn{
     0%{filter:grayscale(.85) brightness(.42)}
@@ -578,26 +578,41 @@ if(starter){
   });
 }
 
-// cinematic: hold the overview a beat, then zoom in fast to the top
-function cinematicIntro(){
-  const wrap=document.querySelector(".wrap");
+// cinematic: show the WHOLE app list (fit to viewport), then zoom in to the top
+const _wrapEl=document.querySelector(".wrap");
+function _introEligible(){
   const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-  if(!wrap || reduce || window.innerWidth<820 || !wrap.animate){ return; }
+  return _wrapEl && _wrapEl.animate && window.innerWidth>=820 && !reduce;
+}
+function _fitScale(){
+  const h=_wrapEl.scrollHeight||1;
+  return Math.max(0.12, Math.min(0.9, (window.innerHeight*0.9)/h));   // fit the whole page in view
+}
+function _applyOverview(){
+  if(!_introEligible()){ if(_wrapEl) _wrapEl.style.transform=""; return; }
+  _wrapEl.style.transformOrigin="50% 0";
+  _wrapEl.style.transform="scale("+_fitScale()+")";
+}
+_applyOverview();
+window.addEventListener("resize",()=>{ if(document.body.classList.contains("frozen")) _applyOverview(); });
+
+function cinematicIntro(){
+  if(!_introEligible()){ return; }
   try{
     const html=document.documentElement;
     window.scrollTo(0,0);
     html.style.overflow="hidden";
-    // keep the overview after un-freezing (inline persists once .frozen is removed)
-    wrap.style.transformOrigin="50% 0";
-    wrap.style.transform="scale(0.5)";
-    wrap.style.willChange="transform";
+    const s=_fitScale();
+    _wrapEl.style.transformOrigin="50% 0";
+    _wrapEl.style.transform="scale("+s+")";
+    _wrapEl.style.willChange="transform";
     setTimeout(()=>{
-      const anim=wrap.animate(
-        [ { transform:"scale(0.5)" }, { transform:"scale(1)" } ],
-        { duration:650, easing:"cubic-bezier(.4,0,.2,1)", fill:"both" }
+      const anim=_wrapEl.animate(
+        [ { transform:"scale("+s+")" }, { transform:"scale(1)" } ],
+        { duration:950, easing:"cubic-bezier(.4,0,.2,1)", fill:"both" }
       );
-      anim.onfinish=()=>{ try{anim.cancel();}catch(e){} wrap.style.transform=""; wrap.style.willChange=""; html.style.overflow=""; };
-    }, 1200);   // hold the lit overview until the flicker settles, then fast zoom
+      anim.onfinish=()=>{ try{anim.cancel();}catch(e){} _wrapEl.style.transform=""; _wrapEl.style.willChange=""; html.style.overflow=""; };
+    }, 1200);   // hold the lit full overview, then zoom in to tonefall
   }catch(e){ document.documentElement.style.overflow=""; }
 }
 </script>
