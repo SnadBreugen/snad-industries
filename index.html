@@ -131,23 +131,23 @@
 
 <script>
 const apps=[
-  {file:"cover-tonefall.html", name:"tonefall", kind:"music game", ac:"--amber",
+  {file:"cover-tonefall.html", name:"tonefall", kind:"music game", ac:"--amber", voice:"voice-tonefall.mp3",
    url:"https://snadbreugen.github.io/tonefall-audiotool/",
    desc:"A browser music game where falling blocks build looping melodies on a grid. Add FX, then send your loop to Audiotool as MIDI, Tonematrix or audio.",
    feat:["Playable music game where falling blocks build looping melodies","Two look modes: classic Tonematrix mono or full colour","FX gestures: long delay, wash, tape stop, transpose, chord stab","8-bit chiptune voice","Send your loop to Audiotool as MIDI, Tonematrix or audio"]},
-  {file:"cover-matrix.html", name:"matrix evolutions", kind:"arpeggiator", ac:"--magenta",
+  {file:"cover-matrix.html", name:"matrix evolutions", kind:"arpeggiator", ac:"--magenta", voice:"voice-matrix.mp3",
    url:"https://snadbreugen.github.io/Matrix-Evolutions/",
    desc:"Draw chords in a piano roll and turn them into arpeggios written straight into your Audiotool project. Configurable direction, rate, octaves, gate and repeat.",
    feat:["Draw chords in a piano roll","Turns them into arpeggios written into your project","Direction, rate, octaves, gate and repeat, all configurable","Works with Heisenberg, Pulverisateur, Bassline and Space"]},
-  {file:"cover-colorguy.html", name:"the color guy", kind:"color tool", ac:"--cyan",
+  {file:"cover-colorguy.html", name:"the color guy", kind:"color tool", ac:"--cyan", voice:"voice-colorguy.mp3",
    url:"https://snadbreugen.github.io/colorizateur/",
    desc:"Recolor every cable, region and mixer strip in your project at once. Pick colors by hand, load a preset or simply randomize.",
    feat:["Bulk recolor cables, regions and mixer strips in one pass","Groups devices into four families (Synths, Drums, Audio, VST)","Presets, randomize, or pick your favorite 3 colors","Undo to revert the last apply"]},
-  {file:"cover-packmidi.html", name:"pack midi", kind:"midi export", ac:"--orange",
+  {file:"cover-packmidi.html", name:"pack midi", kind:"midi export", ac:"--orange", voice:"voice-packmidi.mp3",
    url:"https://snadbreugen.github.io/pack-midi/",
    desc:"Export your Audiotool note tracks as standard MIDI files, one at a time or all at once. BPM is baked in, and Machiniste drums map to GM notes.",
    feat:["Export note tracks as standard .MID files","One track at a time, or all at once","Tempo (BPM) baked into every file","Machiniste drums mapped to GM drum notes","Files named by instrument"]},
-  {file:"cover-vault.html", name:"at vault", kind:"backup / transfer", ac:"--lime",
+  {file:"cover-vault.html", name:"at vault", kind:"backup / transfer", ac:"--lime", voice:"voice-vault.mp3",
    url:"https://snadbreugen.github.io/at-vault/",
    desc:"Export any Audiotool project to a file and import it back any time. Your own backup and transfer vault for projects.",
    feat:["Export any Audiotool project to a file","Import it back any time","Your own backup and transfer vault"]}
@@ -167,8 +167,33 @@ apps.forEach(a=>{
       </div>
       <a class="open" href="${a.url}" target="_blank" rel="noopener">Open ↗</a>
     </div>`;
+  if(a.voice){
+    const frame=sec.querySelector(".frame");
+    let hoverTimer=null;
+    frame.addEventListener("pointerenter",e=>{
+      if(e.pointerType==="touch") return;            // no hover on touch
+      if(frame.dataset.played==="1") return;          // once per app
+      hoverTimer=setTimeout(()=>{ frame.dataset.played="1"; playVoice(a.voice); }, 450);
+    });
+    frame.addEventListener("pointerleave",()=>{ if(hoverTimer){clearTimeout(hoverTimer);hoverTimer=null;} });
+  }
   host.appendChild(sec);
 });
+
+// dystopian announcement on hover, with music ducking
+let _voice=null;
+function playVoice(src){
+  try{
+    if(_voice){ _voice.pause(); _voice=null; }
+    _voice=new Audio(src); _voice.volume=0.95;
+    const wasOn=on;
+    if(wasOn){ fadeTo(0.12,250); }
+    const restore=()=>{ if(wasOn&&on) fadeTo(TARGET_VOL,900); };
+    _voice.play().catch(()=>{});
+    _voice.addEventListener("ended",restore);
+    setTimeout(()=>{ if(!_voice||_voice.ended||_voice.paused) restore(); }, 7000);
+  }catch(e){}
+}
 
 function fit(){
   document.querySelectorAll(".frame").forEach(f=>{
@@ -350,7 +375,7 @@ function fadeTo(target,ms){
     if(i>=steps){clearInterval(fadeTimer);fadeTimer=null;audio.volume=target; if(target===0)audio.pause();}
   },40);
 }
-function start(){if(on)return;audio.volume=0;audio.play().then(()=>{on=true;setIcon();fadeTo(TARGET_VOL,2500);}).catch(()=>{});}
+function start(){if(on)return;audio.volume=TARGET_VOL;audio.play().then(()=>{on=true;setIcon();}).catch(()=>{});}
 btn.addEventListener("click",e=>{e.stopPropagation();if(on){fadeTo(0,600);on=false;}else{audio.volume=0;audio.play();on=true;fadeTo(TARGET_VOL,1200);}setIcon();});
 ["pointerdown","click","keydown","touchend"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
 setIcon();
