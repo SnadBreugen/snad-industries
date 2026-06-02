@@ -17,7 +17,8 @@
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--fg);font-family:'Space Mono',monospace;line-height:1.6;overflow-x:hidden}
   .scan{position:fixed;inset:0;pointer-events:none;z-index:90;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px);mix-blend-mode:multiply;opacity:.35}
-  .wrap{max-width:1100px;margin:0 auto;padding:clamp(20px,4vw,56px)}
+  #rain{position:fixed;inset:0;z-index:1;pointer-events:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:clamp(20px,4vw,56px);position:relative;z-index:3}
 
   header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px;flex-wrap:wrap;gap:12px}
   .brand{font-family:'VT323',monospace;font-size:clamp(34px,7vw,58px);line-height:.9;letter-spacing:1px}
@@ -69,6 +70,7 @@
 </head>
 <body>
 <div class="scan" aria-hidden="true"></div>
+<canvas id="rain" aria-hidden="true"></canvas>
 <div id="margins" aria-hidden="true"></div>
 <audio id="bg" src="morast.mp3" loop></audio>
 <div class="nowplaying">&#9834; now playing &mdash; <b>Morast by Sandburgen</b></div>
@@ -150,7 +152,45 @@ window.addEventListener("resize",fit);
 window.addEventListener("load",fit);
 fit();
 
-// ── margin code snippets: syntax-coloured, type in, hold, crumble ──
+// ── pixel shooting-star rain ──
+(function(){
+  const cv=document.getElementById("rain"); if(!cv) return;
+  const ctx=cv.getContext("2d");
+  const COLS=["#2BDBE2","#E0249A","#BFFF01","#F08020","#FFB228","#7CFC6A","#b78cff","#f2efe6"];
+  let W,H,dpr;
+  function resize(){ dpr=Math.min(2,window.devicePixelRatio||1); W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+"px"; cv.style.height=innerHeight+"px"; }
+  resize(); addEventListener("resize",resize);
+  const P=[];
+  function spawn(){
+    const fast=Math.random()<0.4;
+    const sp=(fast?5:1.6)+Math.random()*(fast?4:1.4);
+    P.push({
+      x:Math.random()*W, y:-10*dpr,
+      vx:((Math.random()-.5)*1.2)*dpr, vy:sp*dpr,
+      s:(fast?2:2)*dpr, col:COLS[(Math.random()*COLS.length)|0],
+      trail:fast?7:3, a:fast?0.9:0.5
+    });
+  }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    if(P.length<28 && Math.random()<0.10) spawn();
+    for(let i=P.length-1;i>=0;i--){
+      const p=P[i];
+      p.x+=p.vx; p.y+=p.vy;
+      for(let t=p.trail;t>=0;t--){
+        const tx=p.x-p.vx*t, ty=p.y-p.vy*t;
+        ctx.globalAlpha=p.a*(1-t/(p.trail+1));
+        ctx.fillStyle=p.col;
+        ctx.fillRect(tx, ty, p.s, p.s);
+      }
+      if(p.y>H+20*dpr) P.splice(i,1);
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
 (function(){
   const layer=document.getElementById("margins");
   const COL={kw:"#b78cff",str:"#7CFC6A",num:"#FF9D42",prop:"#3CE0E8",fn:"#FFE14D",var:"#7CFC6A",com:"#3CE0E8",op:"#c7c5bc"};
