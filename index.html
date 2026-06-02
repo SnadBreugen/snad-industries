@@ -355,9 +355,53 @@ btn.addEventListener("click",e=>{e.stopPropagation();if(on){fadeTo(0,600);on=fal
 ["pointerdown","click","keydown","touchend"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
 setIcon();
 
+function tubeSound(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    const ac=new AC(); const t=ac.currentTime;
+    const master=ac.createGain(); master.gain.value=0.85; master.connect(ac.destination);
+    // electrical hum
+    const hum=ac.createOscillator(); hum.type="sawtooth"; hum.frequency.value=118;
+    const hum2=ac.createOscillator(); hum2.type="square"; hum2.frequency.value=59;
+    const humGain=ac.createGain(); humGain.gain.value=0.0001;
+    const bp=ac.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=850; bp.Q.value=0.7;
+    hum.connect(humGain); hum2.connect(humGain); humGain.connect(bp); bp.connect(master);
+    // high crackle noise
+    const N=Math.floor(ac.sampleRate*1.4), buf=ac.createBuffer(1,N,ac.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<N;i++) d[i]=Math.random()*2-1;
+    const noise=ac.createBufferSource(); noise.buffer=buf;
+    const nHP=ac.createBiquadFilter(); nHP.type="highpass"; nHP.frequency.value=2600;
+    const nGain=ac.createGain(); nGain.gain.value=0.0001;
+    noise.connect(nHP); nHP.connect(nGain); nGain.connect(master);
+    // flicker bursts [start, dur, amp] — synced to the visual tubeOn
+    const bursts=[[0.00,0.05,0.55],[0.08,0.04,0.95],[0.13,0.03,0.25],[0.20,0.05,1.0],[0.25,0.03,0.35],[0.32,0.05,0.85],[0.40,0.04,0.5],[0.47,0.05,0.95],[0.60,0.08,0.6],[0.72,0.12,0.7]];
+    bursts.forEach(b=>{const s=t+b[0],dur=b[1],a=b[2];
+      humGain.gain.setValueAtTime(0.0001,s); humGain.gain.exponentialRampToValueAtTime(0.26*a+0.001,s+0.005); humGain.gain.exponentialRampToValueAtTime(0.0001,s+dur);
+      nGain.gain.setValueAtTime(0.0001,s); nGain.gain.exponentialRampToValueAtTime(0.16*a+0.001,s+0.004); nGain.gain.exponentialRampToValueAtTime(0.0001,s+dur*0.8);
+    });
+    // settle into faint steady buzz, then off
+    humGain.gain.setValueAtTime(0.0001,t+0.86); humGain.gain.exponentialRampToValueAtTime(0.05,t+0.96); humGain.gain.exponentialRampToValueAtTime(0.0001,t+1.5);
+    // the "clunk" of the switch
+    const k=ac.createOscillator(); k.type="triangle"; k.frequency.setValueAtTime(170,t); k.frequency.exponentialRampToValueAtTime(42,t+0.09);
+    const kG=ac.createGain(); kG.gain.setValueAtTime(0.0001,t); kG.gain.exponentialRampToValueAtTime(0.7,t+0.004); kG.gain.exponentialRampToValueAtTime(0.0001,t+0.13);
+    k.connect(kG); kG.connect(master);
+    // sharp click transient
+    const cN=Math.floor(ac.sampleRate*0.02), cbuf=ac.createBuffer(1,cN,ac.sampleRate), cd=cbuf.getChannelData(0);
+    for(let i=0;i<cN;i++) cd[i]=(Math.random()*2-1)*Math.pow(1-i/cN,3);
+    const clk=ac.createBufferSource(); clk.buffer=cbuf;
+    const cHP=ac.createBiquadFilter(); cHP.type="highpass"; cHP.frequency.value=3000;
+    const cG=ac.createGain(); cG.gain.value=0.5;
+    clk.connect(cHP); cHP.connect(cG); cG.connect(master);
+    hum.start(t); hum2.start(t); noise.start(t); k.start(t); clk.start(t);
+    const stop=t+1.6; hum.stop(stop); hum2.stop(stop); noise.stop(stop); k.stop(t+0.2);
+    setTimeout(()=>{try{ac.close();}catch(e){}},1800);
+  }catch(e){}
+}
+
 const starter=document.getElementById("starter");
 if(starter){
   starter.addEventListener("click",()=>{
+    tubeSound();
     document.body.classList.remove("frozen");
     document.body.classList.add("lightson");
     start();
