@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AT VAULT — promo banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#070707; --ink:#f2efe6; --dim:#8d8b82; --lime:#BFFF01; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#000;color:var(--ink);font-family:"Space Mono",monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+
+  .banner{position:relative;width:1200px;height:630px;overflow:hidden;background:#070707;
+    border:3px solid var(--ink);box-shadow:0 0 0 6px #000,0 30px 80px rgba(0,0,0,.7)}
+  .banner::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.5;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+  .banner::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.45;
+    background-image:linear-gradient(rgba(191,255,1,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(191,255,1,.05) 1px,transparent 1px);background-size:34px 34px}
+
+  .inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:center;padding:64px 70px;max-width:600px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .kicker .wave{width:46px;height:26px;color:var(--lime);flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(191,255,1,.5))}
+  .kicker .by{font-family:"Silkscreen",monospace;font-size:13px;letter-spacing:4px;text-transform:uppercase;color:var(--dim)}
+
+  .word{font-family:"Silkscreen",monospace;font-weight:700;line-height:.92;font-size:112px;letter-spacing:2px}
+  .word .a{color:var(--ink)} .word .v{color:var(--lime);text-shadow:0 0 30px rgba(191,255,1,.45)}
+
+  .tag{margin-top:22px;max-width:540px;font-size:21px;line-height:1.5;color:#d9d6cc}
+  .tag b{color:var(--lime);font-weight:700}
+
+  .chips{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
+  .chip{font-family:"Silkscreen",monospace;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:9px 13px;border:2px solid var(--ink);background:rgba(20,20,20,.7);color:var(--ink)}
+  .chip.l{color:#0c1500;background:var(--lime);border-color:var(--lime)}
+
+  .vaultwrap{position:absolute;right:56px;top:50%;transform:translateY(-50%);z-index:2;width:380px;height:380px}
+  .vaultwrap svg{width:100%;height:100%;filter:drop-shadow(0 0 24px rgba(191,255,1,.25))}
+  .door{transform-origin:340px 340px;animation:open 5s ease-in-out infinite}
+  @keyframes open{0%,18%{transform:rotate(0deg)}45%,72%{transform:rotate(-108deg)}92%,100%{transform:rotate(0deg)}}
+  .spokes{transform-origin:340px 340px;animation:spin 5s ease-in-out infinite}
+  @keyframes spin{0%,10%{transform:rotate(0deg)}40%{transform:rotate(-140deg)}70%{transform:rotate(-140deg)}95%,100%{transform:rotate(0deg)}}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <svg class="vaultwrap" viewBox="0 0 680 680" aria-hidden="true">
+      <circle cx="340" cy="340" r="250" fill="none" stroke="#BFFF01" stroke-width="20"/>
+      <circle cx="340" cy="340" r="210" fill="#0c1500" stroke="#BFFF01" stroke-width="6"/>
+      <g class="door">
+        <circle cx="340" cy="340" r="206" fill="#0a0f00"/>
+        <circle cx="340" cy="340" r="206" fill="none" stroke="#BFFF01" stroke-width="4" opacity=".5"/>
+        <g class="spokes" fill="none" stroke="#BFFF01" stroke-width="16" stroke-linecap="round">
+          <line x1="340" y1="250" x2="340" y2="430"/>
+          <line x1="250" y1="340" x2="430" y2="340"/>
+          <line x1="276" y1="276" x2="404" y2="404"/>
+          <line x1="404" y1="276" x2="276" y2="404"/>
+        </g>
+        <circle cx="340" cy="340" r="34" fill="#BFFF01"/>
+        <circle cx="490" cy="340" r="14" fill="#BFFF01"/>
+      </g>
+    </svg>
+
+    <div class="inner">
+      <div class="kicker">
+        <svg class="wave" viewBox="0 0 48 26" aria-hidden="true"><polyline points="1,13 7,13 10,4 15,22 20,7 25,19 30,13 37,13 40,5 45,13 47,13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="by">Snad Industries</span>
+      </div>
+
+      <div class="word"><span class="a">AT </span><span class="v">VAULT</span></div>
+
+      <div class="tag">Export any <b>Audiotool</b> project to a file. Import it back any time.</div>
+
+      <div class="chips">
+        <span class="chip l">export</span>
+        <span class="chip">import</span>
+        <span class="chip">backup</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

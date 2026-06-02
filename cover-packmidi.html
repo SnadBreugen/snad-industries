@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PACK MIDI — promo banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#070707; --orange:#ff7b00; --ink:#f2efe6; --mint:#00f5c4; --dim:#8d8b82; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#000;color:var(--ink);font-family:"Space Mono",monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+
+  .banner{position:relative;width:1200px;height:630px;overflow:hidden;background:#070707;
+    background-image:radial-gradient(120% 90% at 82% 50%,rgba(0,245,196,.10),transparent 55%);}
+  .banner::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.45;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+
+  .inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:center;padding:64px 70px;max-width:620px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .kicker .wave{width:46px;height:26px;color:var(--mint);flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(0,245,196,.5))}
+  .kicker .by{font-size:13px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--dim)}
+  .word{font-family:"Pixelify Sans",monospace;font-weight:700;line-height:.95;font-size:128px;letter-spacing:0;color:var(--orange);text-shadow:0 0 30px rgba(255,123,0,.4)}
+  .tag{margin-top:24px;max-width:520px;font-size:21px;line-height:1.5;color:#d9d6cc}
+  .tag b{color:var(--ink);font-weight:700}
+
+  .file{position:absolute;right:96px;top:50%;transform:translateY(-50%);z-index:2;width:300px;height:360px;
+    filter:drop-shadow(0 0 26px rgba(0,245,196,.3));animation:bob 4.5s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-56%)}}
+  .file svg{width:100%;height:100%}
+  .arr{transform-origin:center;animation:down 2.4s ease-in-out infinite}
+  @keyframes down{0%,100%{transform:translateY(-6px);opacity:.55}50%{transform:translateY(6px);opacity:1}}
+
+  .ticker{position:absolute;left:0;right:0;bottom:0;z-index:5;height:54px;background:var(--orange);overflow:hidden;display:flex;align-items:center;border-top:3px solid #070707}
+  .tk{display:flex;white-space:nowrap;animation:scroll 22s linear infinite}
+  .tk span{font-family:"Space Mono",monospace;font-weight:700;font-size:17px;letter-spacing:2px;color:#1a0c00;padding:0 22px}
+  .tk span b{color:#06231f}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="file" aria-hidden="true">
+      <svg viewBox="0 0 300 360">
+        <path d="M30 14 H210 L270 74 V332 a14 14 0 0 1 -14 14 H44 a14 14 0 0 1 -14 -14 Z" fill="#00f5c4"/>
+        <path d="M210 14 V74 H270 Z" fill="#06231f" opacity=".55"/>
+        <text x="150" y="150" text-anchor="middle" font-family="Space Mono,monospace" font-weight="700" font-size="58" fill="#06231f">.MID</text>
+        <g class="arr" fill="#06231f">
+          <rect x="136" y="196" width="28" height="64" rx="3"/>
+          <polygon points="110,256 190,256 150,304"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="inner">
+      <div class="kicker">
+        <svg class="wave" viewBox="0 0 48 26" aria-hidden="true"><polyline points="1,13 7,13 10,4 15,22 20,7 25,19 30,13 37,13 40,5 45,13 47,13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="by">Snad Industries</span>
+      </div>
+      <div class="word">PACK<br>MIDI</div>
+      <div class="tag">Export your <b>AUDIOTOOL</b> note tracks as standard MIDI files.</div>
+    </div>
+
+    <div class="ticker">
+      <div class="tk" id="tk"></div>
+    </div>
+  </div>
+<script>
+  const items=[
+    "ONE TRACK OR ALL AT ONCE","BPM BAKED IN","MACHINISTE → GM DRUMS",
+    "STANDARD .MID FILES","WORKS WITH EVERY NOTE TRACK","NAMED BY INSTRUMENT","DAW-READY EXPORT"
+  ];
+  const line=items.map(t=>`<span>${t} <b>·</b></span>`).join("");
+  document.getElementById("tk").innerHTML=line+line;
+</script>
+</body>
+</html>

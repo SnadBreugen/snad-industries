@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATRIX EVOLUTIONS — promo banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#070707; --ink:#f2efe6; --dim:#8d8b82; --mag:#E0249A; --amber:#FFA94D; --green:#83DD3F; --face:#14141a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#000;color:var(--ink);font-family:"Space Mono",monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+
+  .banner{position:relative;width:1200px;height:630px;overflow:hidden;background:#070707;
+    background-image:radial-gradient(120% 90% at 80% 15%,rgba(224,36,156,.12),transparent 55%);}
+  .banner::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.45;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+
+  .inner{position:relative;z-index:3;padding:58px 70px 0;max-width:760px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .kicker .wave{width:46px;height:26px;color:var(--mag);flex:0 0 auto}
+  .kicker .by{font-size:13px;letter-spacing:4px;text-transform:uppercase;color:var(--dim)}
+  .word{font-family:"Archivo Black",sans-serif;line-height:.92;font-size:82px;letter-spacing:-1px;text-transform:uppercase}
+  .word .m{color:var(--mag);text-shadow:0 0 30px rgba(224,36,156,.45)} .word .e{color:#FF7A00;text-shadow:0 0 30px rgba(255,122,0,.45)}
+  .tag{margin-top:14px;max-width:640px;font-size:20px;line-height:1.5;color:#d9d6cc}
+  .tag b{color:var(--mag);font-weight:700}
+
+  .region{position:absolute;left:70px;right:70px;bottom:54px;z-index:3;height:190px;
+    background:var(--face);border:2px solid var(--mag);border-radius:4px;overflow:hidden;
+    box-shadow:0 0 30px rgba(224,36,156,.18)}
+  .rhead{position:absolute;top:0;left:0;right:0;height:24px;background:rgba(224,36,156,.18);border-bottom:1px solid rgba(224,36,156,.4);
+    font-family:"Space Mono",monospace;font-size:11px;letter-spacing:2px;color:var(--mag);display:flex;align-items:center;padding:0 10px}
+  .gridarea{position:absolute;top:24px;left:0;right:0;bottom:0}
+  .vline{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.07)}
+  .vbar{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.16)}
+  .hline{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.05)}
+  .note{position:absolute;height:11px;border-radius:2px;background:#d63bf0;transition:box-shadow .08s,filter .08s}
+  .note.acc{background:#d63bf0}
+  .note.hit{filter:brightness(1.45);box-shadow:0 0 14px #d63bf0;color:#d63bf0}
+  .note.acc.hit{color:#d63bf0}
+  .play{position:absolute;top:0;bottom:0;width:2px;background:var(--mag);box-shadow:0 0 12px var(--mag);z-index:4}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="inner">
+      <div class="kicker">
+        <svg class="wave" viewBox="0 0 48 26" aria-hidden="true"><polyline points="1,13 7,13 10,4 15,22 20,7 25,19 30,13 37,13 40,5 45,13 47,13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="by">Snad Industries</span>
+      </div>
+      <div class="word"><span class="m">MATRIX</span><br><span class="e">EVOLUTIONS</span></div>
+      <div class="tag">Draw chords, get arpeggios written straight into your <b>Audiotool</b> project.</div>
+    </div>
+
+    <div class="region">
+      <div class="rhead">ARP &middot; 4 BARS &middot; 1/16</div>
+      <div class="gridarea" id="grid"></div>
+    </div>
+  </div>
+
+<script>
+  const grid=document.getElementById('grid');
+  const W=grid.clientWidth||1060, H=grid.clientHeight||166;
+  const STEPS=32, ROWS=10;
+  const cw=W/STEPS, rh=H/ROWS;
+  for(let i=1;i<STEPS;i++){const l=document.createElement('div');l.className=(i%8===0)?'vbar':'vline';l.style.left=(i*cw)+'px';grid.appendChild(l);}
+  for(let r=1;r<ROWS;r++){const h=document.createElement('div');h.className='hline';h.style.top=(r*rh)+'px';grid.appendChild(h);}
+
+  const pattern=[
+    {s:0,row:7},{s:2,row:5},{s:4,row:6},{s:6,row:3,acc:true},{s:8,row:4},{s:10,row:2},{s:12,row:5},{s:14,row:1,acc:true},
+    {s:16,row:7},{s:18,row:5},{s:20,row:6},{s:22,row:3,acc:true},{s:24,row:4},{s:26,row:2},{s:28,row:5},{s:30,row:0,acc:true}
+  ];
+  const notes=pattern.map(p=>{
+    const el=document.createElement('div');
+    el.className='note'+(p.acc?' acc':'');
+    el.style.left=(p.s*cw+2)+'px';
+    el.style.width=(cw*2-4)+'px';
+    el.style.top=(p.row*rh+(rh-11)/2)+'px';
+    grid.appendChild(el);
+    return {el,start:p.s,end:p.s+2};
+  });
+
+  const play=document.createElement('div');play.className='play';grid.appendChild(play);
+  const LOOP=5200;
+  let t0=null;
+  function frame(t){
+    if(t0===null)t0=t;
+    const phase=((t-t0)%LOOP)/LOOP;
+    const step=phase*STEPS;
+    play.style.left=(phase*W)+'px';
+    notes.forEach(n=>{
+      const on=step>=n.start && step<n.end;
+      n.el.classList.toggle('hit',on);
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>

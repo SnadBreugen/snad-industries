@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE COLOR GUY — promo banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#f2efe6; --dim:#8d8b82; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#000;color:var(--ink);font-family:"Space Mono",monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+
+  .banner{position:relative;width:1200px;height:630px;overflow:hidden;background:#070707;border-radius:10px}
+  .banner::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.4;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+
+  .grid{position:absolute;right:0;top:0;bottom:0;width:560px;z-index:1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr)}
+  .grid b{display:block}
+  .fade{position:absolute;right:0;top:0;bottom:0;width:620px;z-index:2;
+    background:linear-gradient(90deg,#070707 0%,rgba(7,7,7,.35) 42%,transparent 72%)}
+
+  .inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:center;padding:70px;max-width:620px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .kicker .wave{width:46px;height:26px;color:var(--ink);flex:0 0 auto}
+  .kicker .by{font-size:13px;letter-spacing:4px;text-transform:uppercase;color:var(--dim)}
+
+  .word{font-family:"Archivo Black",sans-serif;line-height:.84;font-size:120px;letter-spacing:-2px;text-transform:uppercase;color:var(--ink)}
+  .tag{margin-top:28px;max-width:520px;font-size:21px;line-height:1.5;color:#d9d6cc}
+  .chips{display:flex;gap:8px;margin-top:30px;flex-wrap:wrap}
+  .chip{font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:9px 14px;background:rgba(255,255,255,.08);color:var(--ink)}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="grid" id="g"></div>
+    <div class="fade"></div>
+
+    <div class="inner">
+      <div class="kicker">
+        <svg class="wave" viewBox="0 0 48 26" aria-hidden="true"><polyline points="1,13 7,13 10,4 15,22 20,7 25,19 30,13 37,13 40,5 45,13 47,13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="by">Snad Industries</span>
+      </div>
+
+      <div class="word">THE COLOR GUY</div>
+
+      <div class="tag">Recolor your whole project in one click. Cables, regions and mixer strips.</div>
+
+      <div class="chips">
+        <span class="chip">bulk recolor</span>
+        <span class="chip">presets</span>
+        <span class="chip">randomize</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const PALETTE = [
+    "#e23b2e","#e85a2a","#e7892f","#e7b13a","#e8cf4a","#d7d24e","#a9c83f",
+    "#6fb83f","#3fae5e","#34b08b","#2bb6c0","#2f8fd0","#3a63c4","#5a47c0",
+    "#8a44bf","#b13fa8","#cf3f86","#d44b6a",
+    "#9c5a3c","#b08a5a","#c7b88a","#8a8a72","#6f8a6a","#5a8a8a","#7a6f9c",
+    "#9c6f8a","#c89a8a","#d7c9a0","#a0b88a","#8aa0b8","#b88aa0","#c9b0c0"
+  ];
+  const g=document.getElementById('g');
+  const COLS=8, ROWS=8;
+  const cells=[];
+  function pickFor(idx){
+    const r=Math.floor(idx/COLS), c=idx%COLS;
+    const left = c>0 ? cells[idx-1]?.dataset.col : null;
+    const up   = r>0 ? cells[idx-COLS]?.dataset.col : null;
+    let col;
+    do { col=PALETTE[Math.floor(Math.random()*PALETTE.length)]; }
+    while(col===left || col===up);
+    return col;
+  }
+  for(let i=0;i<COLS*ROWS;i++){
+    const b=document.createElement('b');
+    g.appendChild(b); cells.push(b);
+  }
+  cells.forEach((b,i)=>{ const col=pickFor(i); b.style.background=col; b.dataset.col=col; });
+
+  function set(i){ const col=pickFor(i); cells[i].style.background=col; cells[i].dataset.col=col; }
+  function burst(){
+    let ticks=26+Math.floor(Math.random()*8);
+    const total=ticks;
+    const iv=setInterval(()=>{
+      const frac=ticks/total;
+      let n;
+      if(frac>0.45) n=cells.length;
+      else if(frac>0.2) n=10+Math.floor(Math.random()*16);
+      else n=2+Math.floor(Math.random()*5);
+      for(let k=0;k<n;k++){ set(Math.floor(Math.random()*cells.length)); }
+      if(--ticks<=0){ clearInterval(iv); setTimeout(burst, 1900+Math.random()*3000); }
+    },80);
+  }
+  setTimeout(burst, 500);
+</script>
+</body>
+</html>

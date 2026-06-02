@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TONEFALL — promo banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070707; --panel:#141414; --ink:#f2efe6; --dim:#8d8b82;
+    --amber:#ffb228; --cyan:#2fd9c4; --pink:#ff5fa2; --screen:#0b0e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#000; color:var(--ink); font-family:"Space Mono",monospace;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+  }
+
+  /* 1200x630 — standard share/OG banner size */
+  .banner{
+    position:relative; width:1200px; height:630px; overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 18% 18%, rgba(255,178,40,.16), transparent 55%),
+      radial-gradient(120% 120% at 88% 92%, rgba(47,217,196,.14), transparent 55%),
+      radial-gradient(90% 90% at 70% 10%, rgba(255,95,162,.10), transparent 55%),
+      #070707;
+    border:3px solid var(--ink); box-shadow:0 0 0 6px #000, 0 30px 80px rgba(0,0,0,.7);
+  }
+  /* scanlines + grid texture */
+  .banner::before{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:3; opacity:.5;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.04) 0 1px, transparent 1px 3px);
+  }
+  .banner::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(242,239,230,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(242,239,230,.04) 1px, transparent 1px);
+    background-size:34px 34px;
+  }
+
+  .inner{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column;
+    justify-content:center; padding:64px 70px; }
+
+  .kicker{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .kicker .wave{ width:46px; height:26px; color:var(--amber); flex:0 0 auto;
+    filter:drop-shadow(0 0 8px rgba(255,178,40,.6)); }
+  .kicker .by{ font-family:"Silkscreen",monospace; font-size:13px; letter-spacing:4px;
+    text-transform:uppercase; color:var(--dim); }
+
+  .word{ font-family:"Silkscreen",monospace; font-weight:700; line-height:.92;
+    font-size:140px; letter-spacing:2px; }
+  .word .t{ color:var(--ink); text-shadow:0 0 30px rgba(242,239,230,.25); }
+  .word .f{ color:var(--amber); text-shadow:0 0 34px rgba(255,178,40,.55); }
+
+  .tag{ margin-top:20px; max-width:680px; font-size:21px; line-height:1.5; color:#d9d6cc; }
+  .tag b{ color:var(--cyan); font-weight:700; }
+  .tag .pk{ color:var(--pink); font-weight:700; }
+
+  .chips{ display:flex; gap:10px; margin-top:30px; flex-wrap:wrap; }
+  .chip{ font-family:"Silkscreen",monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase;
+    padding:9px 13px; border:2px solid var(--ink); background:rgba(20,20,20,.7); }
+  .chip.a{ color:#000; background:var(--amber); border-color:var(--amber); }
+  .chip.c{ color:#06231f; background:var(--cyan); border-color:var(--cyan); }
+  .chip.p{ color:#2a0a18; background:var(--pink); border-color:var(--pink); }
+
+  .url{ position:absolute; left:70px; bottom:42px; z-index:2; font-family:"Silkscreen",monospace;
+    font-size:13px; letter-spacing:2px; color:var(--dim); }
+  .url b{ color:var(--amber); }
+
+  /* floating tetromino blocks, right side */
+  .blocks{ position:absolute; right:60px; top:0; bottom:0; width:380px; z-index:2; }
+  .blk{ position:absolute; width:46px; height:46px; border-radius:8px;
+    box-shadow:0 0 22px currentColor, inset 0 0 8px rgba(255,255,255,.35); }
+  .blk i{ position:absolute; inset:7px; border-radius:4px; background:rgba(255,255,255,.85); opacity:.5; }
+  .c-cyan{ color:var(--cyan); background:var(--cyan); }
+  .c-amb{ color:var(--amber); background:var(--amber); }
+  .c-pink{ color:var(--pink); background:var(--pink); }
+  .float{ animation:bob 4.5s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-14px) } }
+  .playhead{ position:absolute; top:8%; bottom:8%; width:3px; right:196px; z-index:2;
+    background:linear-gradient(to bottom, transparent, var(--amber), transparent);
+    box-shadow:0 0 18px var(--amber); opacity:.7; animation:sweep 3.4s ease-in-out infinite alternate; }
+  @keyframes sweep{ from{ right:300px } to{ right:90px } }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="blocks">
+      <!-- a loose tetromino cluster -->
+      <div class="blk c-cyan float" style="top:120px; right:230px; animation-delay:0s"><i></i></div>
+      <div class="blk c-cyan float" style="top:120px; right:178px; animation-delay:.1s"><i></i></div>
+      <div class="blk c-cyan float" style="top:120px; right:126px; animation-delay:.2s"><i></i></div>
+      <div class="blk c-amb float" style="top:172px; right:126px; animation-delay:.3s"><i></i></div>
+
+      <div class="blk c-pink float" style="top:300px; right:206px; animation-delay:.5s"><i></i></div>
+      <div class="blk c-pink float" style="top:352px; right:206px; animation-delay:.6s"><i></i></div>
+      <div class="blk c-pink float" style="top:352px; right:154px; animation-delay:.7s"><i></i></div>
+
+      <div class="blk c-amb float" style="top:430px; right:104px; animation-delay:.4s"><i></i></div>
+      <div class="blk c-amb float" style="top:430px; right:156px; animation-delay:.45s"><i></i></div>
+      <div class="blk c-cyan float" style="top:430px; right:208px; animation-delay:.55s"><i></i></div>
+    </div>
+    <div class="playhead"></div>
+
+    <div class="inner">
+      <div class="kicker">
+        <svg class="wave" viewBox="0 0 48 26" aria-hidden="true">
+          <polyline points="1,13 7,13 10,4 15,22 20,7 25,19 30,13 37,13 40,5 45,13 47,13"
+            fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="by">Snad Industries</span>
+      </div>
+
+      <div class="word"><span class="t">TONE</span><span class="f">FALL</span></div>
+
+      <div class="tag">
+        Stack blocks, make melodies — then send your loop straight into
+        <b>Audiotool</b> as <b>MIDI</b> or <span class="pk">audio</span>.
+      </div>
+
+      <div class="chips">
+        <span class="chip a">browser game</span>
+        <span class="chip c">midi + audio export</span>
+        <span class="chip p">8-bit voice</span>
+        <span class="chip">tempo-locked loops</span>
+      </div>
+    </div>
+
+    <div class="url">snadbreugen.github.io/<b>tonefall-audiotool</b></div>
+  </div>
+</body>
+</html>
