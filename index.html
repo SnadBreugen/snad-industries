@@ -275,6 +275,29 @@ function clickTick(vol,pan){
   }catch(e){}
 }
 
+// ── soft digital pip for the margin code lines (felt more than heard) ──
+let lastPip=0;
+function marginPip(pan){
+  try{
+    const now=performance.now();
+    if(now-lastPip < 110) return;        // global throttle → single felt blips, no rattle
+    lastPip=now;
+    if(!tickCtx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; tickCtx=new AC(); }
+    const ac=tickCtx, t=ac.currentTime;
+    const osc=ac.createOscillator(); osc.type="sine";
+    const notes=[1568,1760,2093,2349,2637];        // high, datastream-like, varied
+    osc.frequency.value=notes[(Math.random()*notes.length)|0];
+    const g=ac.createGain();
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.04,t+0.004);   // very quiet
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.07);
+    let tail=g;
+    if(typeof pan==="number" && ac.createStereoPanner){ const p=ac.createStereoPanner(); p.pan.value=pan; g.connect(p); tail=p; }
+    osc.connect(g); tail.connect(ac.destination);
+    osc.start(t); osc.stop(t+0.09);
+  }catch(e){}
+}
+
 // ── pixel shooting-star rain ──
 (function(){
   const cv=document.getElementById("rain"); if(!cv) return;
@@ -403,12 +426,12 @@ function clickTick(vol,pan){
     el.style.left=x+"px"; el.style.top=y+"px"; el.style.visibility="visible";
     active.add(el);
     let i=0;
-    const tickPan = placedSide==="L" ? -0.85 : 0.85;
+    const tickPan = placedSide==="L" ? -0.6 : 0.6;
     const typer=setInterval(()=>{
       if(i<chars.length){
         chars[i].style.opacity="1";
         const t=chars[i].textContent;
-        if(t&&t!=="\u00a0"&&Math.random()<0.6) clickTick(0.032, tickPan);  // margin: quiet, panned to its side
+        if(t&&t!=="\u00a0"&&Math.random()<0.5) marginPip(tickPan);  // soft digital pip, panned to its side
         i++;
       }
       else{ clearInterval(typer); caret.remove(); setTimeout(crumble, 1700+Math.random()*1800); }
