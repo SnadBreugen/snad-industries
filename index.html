@@ -59,6 +59,14 @@
   .nowplaying b{color:var(--cyan);font-weight:400}
   @media(prefers-reduced-motion:reduce){.scan{display:none}}
 
+  #starter{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(8,8,8,.78);backdrop-filter:blur(3px);cursor:pointer}
+  #starter .box{text-align:center}
+  #starter .b{font-family:'VT323',monospace;font-size:clamp(28px,5vw,46px);color:var(--orange);letter-spacing:1px;line-height:.9}
+  #starter .cta{margin-top:22px;display:inline-block;font-family:'Space Mono',monospace;font-size:15px;letter-spacing:3px;text-transform:uppercase;color:#0a0a0a;background:var(--cyan);padding:14px 30px;border-radius:8px;animation:pulse 1.8s ease-in-out infinite}
+  #starter .sub{margin-top:16px;font-size:12px;color:var(--dim);letter-spacing:2px}
+  @keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(43,219,226,.4)}50%{transform:scale(1.04);box-shadow:0 0 0 12px rgba(43,219,226,0)}}
+  #starter.hide{opacity:0;pointer-events:none;transition:opacity .5s ease}
+
   #margins{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
   .snip{position:fixed;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.3px;white-space:nowrap;color:#7CFC6A;text-shadow:0 1px 3px rgba(0,0,0,.7)}
   .snip .c{opacity:0;display:inline-block;will-change:transform,opacity}
@@ -70,6 +78,7 @@
 </head>
 <body>
 <div class="scan" aria-hidden="true"></div>
+<div id="starter"><div class="box"><div class="b">SNAD // INDUSTRIES</div><div class="cta">▶ Click me</div><div class="sub">enter the showroom</div></div></div>
 <canvas id="rain" aria-hidden="true"></canvas>
 <div id="margins" aria-hidden="true"></div>
 <audio id="bg" src="morast.mp3" loop></audio>
@@ -324,8 +333,17 @@ function fadeTo(target,ms){
 }
 function start(){if(on)return;audio.volume=0;audio.play().then(()=>{on=true;setIcon();fadeTo(TARGET_VOL,2500);}).catch(()=>{});}
 btn.addEventListener("click",e=>{e.stopPropagation();if(on){fadeTo(0,600);on=false;}else{audio.volume=0;audio.play();on=true;fadeTo(TARGET_VOL,1200);}setIcon();});
-["mousemove","pointerdown","click","scroll","keydown","touchstart"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
+["pointerdown","click","keydown","touchend"].forEach(ev=>window.addEventListener(ev,start,{once:false}));
 setIcon();
+
+const starter=document.getElementById("starter");
+if(starter){
+  starter.addEventListener("click",()=>{
+    start();
+    starter.classList.add("hide");
+    setTimeout(()=>starter.remove(),600);
+  });
+}
 </script>
 </body>
 </html>
