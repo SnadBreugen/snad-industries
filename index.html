@@ -172,6 +172,7 @@ apps.forEach(a=>{
     let hoverTimer=null;
     frame.addEventListener("pointerenter",e=>{
       if(e.pointerType==="touch") return;            // no hover on touch
+      if(!voiceArmed) return;                          // ignore until user has moved in fresh
       if(frame.dataset.played==="1") return;          // once per app
       hoverTimer=setTimeout(()=>{ frame.dataset.played="1"; playVoice(a.voice); }, 450);
     });
@@ -180,18 +181,16 @@ apps.forEach(a=>{
   host.appendChild(sec);
 });
 
-// dystopian announcement on hover, with music ducking
+// announcements stay disarmed briefly after lights-on, so the banner the cursor
+// happens to rest on won't fire; armed shortly after, only fresh hovers trigger.
+let voiceArmed=false;
+
 let _voice=null;
 function playVoice(src){
   try{
     if(_voice){ _voice.pause(); _voice=null; }
-    _voice=new Audio(src); _voice.volume=0.95;
-    const wasOn=on;
-    if(wasOn){ fadeTo(0.12,250); }
-    const restore=()=>{ if(wasOn&&on) fadeTo(TARGET_VOL,900); };
+    _voice=new Audio(src); _voice.volume=0.6;
     _voice.play().catch(()=>{});
-    _voice.addEventListener("ended",restore);
-    setTimeout(()=>{ if(!_voice||_voice.ended||_voice.paused) restore(); }, 7000);
   }catch(e){}
 }
 
@@ -434,6 +433,7 @@ if(starter){
     starter.classList.add("hide");
     setTimeout(()=>starter.remove(),700);
     setTimeout(()=>document.body.classList.remove("lightson"),1300);
+    setTimeout(()=>{ voiceArmed=true; },1400);
   });
 }
 </script>
