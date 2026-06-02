@@ -36,6 +36,11 @@
   .app{margin:64px 0 0}
   .frame{position:relative;width:100%;aspect-ratio:1248/678;overflow:hidden;border-radius:12px;border:1px solid var(--line);background:#070707}
   .frame iframe{position:absolute;top:0;left:0;width:1248px;height:678px;border:0;transform-origin:top left}
+  .say{position:absolute;top:0;left:0;right:0;z-index:6;padding:14px 20px;font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(15px,1.7vw,22px);letter-spacing:.5px;line-height:1.3;color:var(--ac);text-shadow:0 2px 12px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.95);background:linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,0));opacity:0;pointer-events:none}
+  .say.on{opacity:1}
+  .say.fade{opacity:0;transition:opacity .6s ease}
+  .say.on[data-typing="1"]::after{content:"▋";margin-left:1px;animation:cblink .8s steps(1) infinite}
+  @keyframes cblink{50%{opacity:0}}
   .meta{margin-top:22px;display:grid;grid-template-columns:1fr auto;gap:18px 28px;align-items:start}
   @media(max-width:680px){.meta{grid-template-columns:1fr}}
   .mhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -131,23 +136,28 @@
 
 <script>
 const apps=[
-  {file:"cover-tonefall.html", name:"tonefall", kind:"music game", ac:"--amber", voice:"voice-tonefall.mp3",
+  {file:"cover-tonefall.html", name:"tonefall", kind:"music game", ac:"--amber", voice:"voice-tonefall.mp3", len:4.6,
+   say:"Game systems active. Productivity will resume shortly.",
    url:"https://snadbreugen.github.io/tonefall-audiotool/",
    desc:"A browser music game where falling blocks build looping melodies on a grid. Add FX, then send your loop to Audiotool as MIDI, Tonematrix or audio.",
    feat:["Playable music game where falling blocks build looping melodies","Two look modes: classic Tonematrix mono or full colour","FX gestures: long delay, wash, tape stop, transpose, chord stab","8-bit chiptune voice","Send your loop to Audiotool as MIDI, Tonematrix or audio"]},
-  {file:"cover-matrix.html", name:"matrix evolutions", kind:"arpeggiator", ac:"--magenta", voice:"voice-matrix.mp3",
+  {file:"cover-matrix.html", name:"matrix evolutions", kind:"arpeggiator", ac:"--magenta", voice:"voice-matrix.mp3", len:5.3,
+   say:"Pattern engine online. Your chords now belong to the sequence.",
    url:"https://snadbreugen.github.io/Matrix-Evolutions/",
    desc:"Draw chords in a piano roll and turn them into arpeggios written straight into your Audiotool project. Configurable direction, rate, octaves, gate and repeat.",
    feat:["Draw chords in a piano roll","Turns them into arpeggios written into your project","Direction, rate, octaves, gate and repeat, all configurable","Works with Heisenberg, Pulverisateur, Bassline and Space"]},
-  {file:"cover-colorguy.html", name:"the color guy", kind:"color tool", ac:"--cyan", voice:"voice-colorguy.mp3",
+  {file:"cover-colorguy.html", name:"the color guy", kind:"color tool", ac:"--cyan", voice:"voice-colorguy.mp3", len:5.07,
+   say:"Chromatic compliance initiated. Resistance is colorless.",
    url:"https://snadbreugen.github.io/colorizateur/",
    desc:"Recolor every cable, region and mixer strip in your project at once. Pick colors by hand, load a preset or simply randomize.",
    feat:["Bulk recolor cables, regions and mixer strips in one pass","Groups devices into four families (Synths, Drums, Audio, VST)","Presets, randomize, or pick your favorite 3 colors","Undo to revert the last apply"]},
-  {file:"cover-packmidi.html", name:"pack midi", kind:"midi export", ac:"--orange", voice:"voice-packmidi.mp3",
+  {file:"cover-packmidi.html", name:"pack midi", kind:"midi export", ac:"--orange", voice:"voice-packmidi.mp3", len:4.6,
+   say:"Extraction authorized. Your notes are leaving the building.",
    url:"https://snadbreugen.github.io/pack-midi/",
    desc:"Export your Audiotool note tracks as standard MIDI files, one at a time or all at once. BPM is baked in, and Machiniste drums map to GM notes.",
    feat:["Export note tracks as standard .MID files","One track at a time, or all at once","Tempo (BPM) baked into every file","Machiniste drums mapped to GM drum notes","Files named by instrument"]},
-  {file:"cover-vault.html", name:"at vault", kind:"backup / transfer", ac:"--lime", voice:"voice-vault.mp3",
+  {file:"cover-vault.html", name:"at vault", kind:"backup / transfer", ac:"--lime", voice:"voice-vault.mp3", len:5.33,
+   say:"Vault access granted. Nothing is ever truly terminated.",
    url:"https://snadbreugen.github.io/at-vault/",
    desc:"Export any Audiotool project to a file and import it back any time. Your own backup and transfer vault for projects.",
    feat:["Export any Audiotool project to a file","Import it back any time","Your own backup and transfer vault"]}
@@ -158,7 +168,7 @@ apps.forEach(a=>{
   const sec=document.createElement("section");
   sec.className="app"; sec.style.setProperty("--ac",`var(${a.ac})`);
   sec.innerHTML=`
-    <div class="frame"><iframe loading="lazy" title="${a.name}" src="${a.file}" scrolling="no"></iframe></div>
+    <div class="frame"><div class="say"></div><iframe loading="lazy" title="${a.name}" src="${a.file}" scrolling="no"></iframe></div>
     <div class="meta">
       <div>
         <div class="mhead"><span class="mname">${a.name.toUpperCase()}</span><span class="mkind">${a.kind}</span></div>
@@ -169,17 +179,39 @@ apps.forEach(a=>{
     </div>`;
   if(a.voice){
     const frame=sec.querySelector(".frame");
+    const sayEl=frame.querySelector(".say");
     let hoverTimer=null;
     frame.addEventListener("pointerenter",e=>{
       if(e.pointerType==="touch") return;            // no hover on touch
-      if(!voiceArmed) return;                          // ignore until user has moved in fresh
+      if(!voiceArmed) return;                          // ignore until armed after lights-on
       if(frame.dataset.played==="1") return;          // once per app
-      hoverTimer=setTimeout(()=>{ frame.dataset.played="1"; playVoice(a.voice); }, 450);
+      hoverTimer=setTimeout(()=>{
+        frame.dataset.played="1";
+        playVoice(a.voice);
+        if(a.say) typeCaption(sayEl, a.say, Math.max(1200,(a.len||4.6)*1000-500));
+      }, 450);
     });
     frame.addEventListener("pointerleave",()=>{ if(hoverTimer){clearTimeout(hoverTimer);hoverTimer=null;} });
   }
   host.appendChild(sec);
 });
+
+// typed system caption above the banner, timed to roughly match the voice
+function typeCaption(el,text,ms){
+  el.classList.remove("fade"); el.classList.add("on"); el.dataset.typing="1"; el.textContent="";
+  const n=text.length, step=Math.max(20, ms/n);
+  let i=0;
+  const iv=setInterval(()=>{
+    i++; el.textContent=text.slice(0,i);
+    if(i>=n){
+      clearInterval(iv); el.dataset.typing="0";
+      setTimeout(()=>{
+        el.classList.remove("on"); el.classList.add("fade");
+        setTimeout(()=>{ el.classList.remove("fade"); el.textContent=""; }, 700);
+      }, 1500);
+    }
+  }, step);
+}
 
 // announcements stay disarmed briefly after lights-on, so the banner the cursor
 // happens to rest on won't fire; armed shortly after, only fresh hovers trigger.
@@ -189,7 +221,7 @@ let _voice=null;
 function playVoice(src){
   try{
     if(_voice){ _voice.pause(); _voice=null; }
-    _voice=new Audio(src); _voice.volume=0.6;
+    _voice=new Audio(src); _voice.volume=0.95;
     _voice.play().catch(()=>{});
   }catch(e){}
 }
