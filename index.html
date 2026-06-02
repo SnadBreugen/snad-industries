@@ -576,7 +576,7 @@ function tubeSound(){
   function resize(){ dpr=Math.min(2,window.devicePixelRatio||1); cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; cv.style.width=innerWidth+"px"; cv.style.height=innerHeight+"px"; ctx.setTransform(dpr,0,0,dpr,0,0); }
   resize(); addEventListener("resize",resize);
   const cssVar=v=>{ try{return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#f2efe6";}catch(e){return "#f2efe6";} };
-  const colors=(typeof apps!=="undefined") ? apps.map(a=>cssVar(a.ac)) : frames.map(()=>"#f2efe6");
+  const colors=(typeof apps!=="undefined") ? apps.map((a,i)=> i===0 ? "#ffffff" : cssVar(a.ac)) : frames.map(()=>"#ffffff");
   let mx=null,my=null,touch=false,appear=0;
   addEventListener("pointermove",e=>{ if(e.pointerType==="touch"){touch=true;return;} mx=e.clientX; my=e.clientY; },{passive:true});
   addEventListener("touchstart",()=>{touch=true;},{passive:true});
@@ -627,12 +627,39 @@ function tubeSound(){
   requestAnimationFrame(loop);
 })();
 
+// ── freeze the banner iframes until LIGHTS ON (they animate independently of the page) ──
+function _gripFreeze(ifr, frozen){
+  try{
+    const win=ifr.contentWindow; if(!win) return;
+    if(!win.__gripped){
+      win.__gripped=true; win.__pendingRAF=null;
+      win.__realRAF=win.requestAnimationFrame.bind(win);
+      win.requestAnimationFrame=function(cb){ if(win.__frozen){ win.__pendingRAF=cb; return 0; } return win.__realRAF(cb); };
+    }
+    win.__frozen=frozen;
+    const d=ifr.contentDocument;
+    if(d){
+      let s=d.getElementById("__freeze");
+      if(frozen){ if(!s){ s=d.createElement("style"); s.id="__freeze"; s.textContent="*{animation-play-state:paused!important}"; (d.head||d.documentElement).appendChild(s); } }
+      else if(s){ s.remove(); }
+    }
+    if(!frozen && win.__pendingRAF){ const cb=win.__pendingRAF; win.__pendingRAF=null; win.__realRAF(cb); }
+  }catch(e){}
+}
+function _freezeAll(frozen){ document.querySelectorAll(".frame iframe").forEach(ifr=>_gripFreeze(ifr,frozen)); }
+document.querySelectorAll(".frame iframe").forEach(ifr=>{
+  const apply=()=>_gripFreeze(ifr, document.body.classList.contains("frozen"));
+  try{ if(ifr.contentDocument && ifr.contentDocument.readyState==="complete") apply(); }catch(e){}
+  ifr.addEventListener("load", apply);
+});
+
 const starter=document.getElementById("starter");
 if(starter){
   const sw=starter.querySelector(".sw");
   (sw||starter).addEventListener("click",(e)=>{
     e.stopPropagation();
     tubeSound();
+    _freezeAll(false);
     document.body.classList.remove("frozen");
     document.body.classList.add("lightson");
     start();
