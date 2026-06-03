@@ -731,6 +731,7 @@ document.querySelectorAll(".frame iframe").forEach(ifr=>{
 function playGlitchVoice(file, opts){
   opts=opts||{}; const vol=(opts.vol!=null)?opts.vol:0.5; const stutter=(opts.stutter!==false);
   const gritAmt=(opts.grit!=null)?opts.grit:0.18; const hp=(opts.hp!=null)?opts.hp:0; const rate=(opts.rate!=null)?opts.rate:1;
+  const crush=(opts.crush!=null)?opts.crush:0; const crushBits=(opts.crushBits!=null)?opts.crushBits:4; const dropN=opts.drops||0;
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     if(window.__isSpeaking && window.__isSpeaking()) return;   // never overlap another voice
@@ -740,25 +741,27 @@ function playGlitchVoice(file, opts){
     beginSpeak(el);
     const src=ac.createMediaElementSource(el);
     const g=ac.createGain(); g.gain.value=vol;
-    // optional high-pass to clear muddy bass so consonants cut through
     let head=g;
     if(hp>0){ const f=ac.createBiquadFilter(); f.type="highpass"; f.frequency.value=hp; g.connect(f); head=f; }
-    const ws=ac.createWaveShaper();                        // grit
-    const n=1024,c=new Float32Array(n),k=6;
-    for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); }
-    ws.curve=c; ws.oversample="2x";
-    const wet=ac.createGain(); wet.gain.value=gritAmt;
     const dry=ac.createGain(); dry.gain.value=1.0;
-    src.connect(g);
-    head.connect(dry); dry.connect(ac.destination);
-    head.connect(ws); ws.connect(wet); wet.connect(ac.destination);
+    src.connect(g); head.connect(dry); dry.connect(ac.destination);
+    if(gritAmt>0){                                          // soft grit
+      const ws=ac.createWaveShaper(); const n=1024,c=new Float32Array(n),k=6;
+      for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); } ws.curve=c; ws.oversample="2x";
+      const wet=ac.createGain(); wet.gain.value=gritAmt; head.connect(ws); ws.connect(wet); wet.connect(ac.destination);
+    }
+    if(crush>0){                                            // real bitcrush (amplitude quantization)
+      const cs=ac.createWaveShaper(); const n=2048,cv=new Float32Array(n),L=Math.pow(2,crushBits);
+      for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; cv[i]=Math.round(x*L)/L; } cs.curve=cv; cs.oversample="none";
+      const cw=ac.createGain(); cw.gain.value=crush; head.connect(cs); cs.connect(cw); cw.connect(ac.destination);
+    }
     el.play().then(()=>{
       if(!stutter) return;
       const dur=el.duration||1.1;
-      const drops=2+Math.floor(Math.random()*2);          // 2–3 short dropouts = dezent stutter
+      const drops=dropN||(2+Math.floor(Math.random()*2));
       for(let i=0;i<drops;i++){
-        const t=ac.currentTime+0.15+Math.random()*Math.max(0.3,dur-0.4);
-        const len=0.02+Math.random()*0.03;                // 20–50 ms
+        const t=ac.currentTime+0.12+Math.random()*Math.max(0.25,dur-0.3);
+        const len=0.02+Math.random()*0.045;
         g.gain.setValueAtTime(vol,t);
         g.gain.setValueAtTime(0.0,t+0.001);
         g.gain.setValueAtTime(vol,t+len);
@@ -767,7 +770,7 @@ function playGlitchVoice(file, opts){
     el.addEventListener("ended",()=>{ setTimeout(()=>{try{ac.close();}catch(e){}},200); });
   }catch(e){}
 }
-function playIdleGlitch(){ playGlitchVoice("voice-idle.mp3"); }   // idle stays quiet + stutter
+function playIdleGlitch(){ playGlitchVoice("voice-idle.mp3"); }
 function playIdleGlitch(){ playGlitchVoice("voice-idle.mp3"); }
 
 // ── periodic promo announcements: fixed order, app-level volume, chorus+bitcrush+crackle, speech-synced light pulse ──
@@ -852,7 +855,9 @@ if(starter){
     if(besideClicks<=3){
       starter.classList.remove("s1","s2","s3");
       starter.classList.add("s"+besideClicks);                // lime → amber → red, persists
-      playGlitchVoice("voice-idle.mp3");                       // same voice each time
+      if(besideClicks===1)      playGlitchVoice("voice-idle-dry.mp3", {grit:0, stutter:false});            // clean
+      else if(besideClicks===2) playGlitchVoice("voice-idle.mp3", {grit:0.18, crush:0.22, crushBits:6});   // chorus + light bitcrush
+      else                      playGlitchVoice("voice-idle.mp3", {grit:0.28, crush:0.5, crushBits:4, drops:6}); // heavy crush + dropouts
     } else if(besideClicks===4){
       powerDownSound(); starter.classList.add("blackout");     // lights out — switch stays, barely
     }
