@@ -190,9 +190,9 @@ apps.forEach(a=>{
       if(frame.dataset.played==="1") return;          // once per app
       hoverTimer=setTimeout(()=>{
         frame.dataset.played="1";
-        playVoice(a.voice, ()=>{ frame.dataset.done="1"; if(window.__armPromos) window.__armPromos(); });
+        playVoice(a.voice, ()=>{ frame.dataset.done="1"; });
         if(a.say) typeCaption(sayEl, a.say, Math.max(1200,(a.len||4.6)*1000-500));
-        setTimeout(()=>{ frame.dataset.done="1"; if(window.__armPromos) window.__armPromos(); }, ((a.len||4.6)+2)*1000);  // safety if 'ended' never fires
+        setTimeout(()=>{ frame.dataset.done="1"; }, ((a.len||4.6)+2)*1000);  // safety if 'ended' never fires
       }, 450);
     });
     frame.addEventListener("pointerleave",()=>{ if(hoverTimer){clearTimeout(hoverTimer);hoverTimer=null;} });
