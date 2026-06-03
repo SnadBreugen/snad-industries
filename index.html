@@ -392,7 +392,20 @@ function marginPip(pan){
     [["var","github"],["prop",".user"],["op"," = "],["str","\"SnadBreugen\""],["com","  // capital B"]]
   ];
   let bag=[];
-  function nextLine(){ if(!bag.length){bag=[...LINES].sort(()=>Math.random()-.5);} return bag.pop(); }
+  // make sure the morast fact (audiotool synths only, no samples/drums) shows early...
+  const PRIORITY=[
+    [["com","// morast: no samples, no drum machines"]],
+    [["var","morast"],["prop",".made_with"],["op"," = "],["str","\"audiotool synths + fx only\""]]
+  ];
+  let prio=[...PRIORITY];
+  function nextLine(){
+    if(prio.length) return prio.shift();                    // morast facts come first
+    if(!bag.length){
+      // ...and recur more often than the rest (weighted in twice)
+      bag=[...LINES, ...PRIORITY, ...PRIORITY].sort(()=>Math.random()-.5);
+    }
+    return bag.pop();
+  }
   const active=new Set();
   function margin(){ return (window.innerWidth-1100)/2; }
   function overlaps(y,h){ for(const e of active){ const r=e.getBoundingClientRect(); if(Math.abs(r.top-y)<h+10) return true; } return false; }
@@ -501,9 +514,13 @@ function start(){                                  // called by LIGHTS ON
   on=true; setIcon();
   loadBuffer().then(()=>{
     if(actx.state==="suspended") actx.resume();
-    startSource();
-    gain.gain.cancelScheduledValues(actx.currentTime);
-    gain.gain.setValueAtTime(TARGET_VOL, actx.currentTime);   // start at full, no fade-in
+    setTimeout(()=>{                                // let the tube sound land first
+      if(!on) return;                               // user may have muted in the meantime
+      startSource();
+      gain.gain.cancelScheduledValues(actx.currentTime);
+      gain.gain.setValueAtTime(0, actx.currentTime);
+      fadeTo(TARGET_VOL, 600);                       // soft fade-in, no kick-slam
+    }, 800);
   }).catch(()=>{});
 }
 btn.addEventListener("click",e=>{
@@ -514,6 +531,7 @@ btn.addEventListener("click",e=>{
   setIcon();
 });
 // music starts only via the LIGHTS ON button (see starter handler below)
+try{ loadBuffer(); }catch(e){}   // pre-decode morast.flac on the start screen (silent, context stays suspended)
 setIcon();
 
 function tubeSound(){
