@@ -397,23 +397,17 @@ function marginPip(pan){
     [["var","location"],["op"," = "],["str","\"Germany\""]],
     [["var","sandburgen"],["prop",".tracks"],["op"," = "],["num","470"]],
     [["com","// fragments. DE + EN. no fluff"]],
-    [["var","github"],["prop",".user"],["op"," = "],["str","\"SnadBreugen\""],["com","  // capital B"]]
+    [["var","github"],["prop",".user"],["op"," = "],["str","\"SnadBreugen\""],["com","  // capital B"]],
+    [["var","snad"],["prop",".speaks"],["op"," = "],["str","\"german\""]],
+    [["com","// snad wants a 'go' before I start coding"]],
+    [["com","// always ask for a go"]],
+    [["var","snad"],["prop",".dislikes"],["op"," = "],["str","\"cowboy coding\""]],
+    [["com","// codophobia — thinks one bug could endanger world peace"]],
+    [["var","snad"],["prop",".reviews"],["op"," = "],["str","\"every pixel\""]],
+    [["com","// step by step, or not at all"]]
   ];
   let bag=[];
-  // make sure the morast fact (audiotool synths only, no samples/drums) shows early...
-  const PRIORITY=[
-    [["com","// morast: no samples, no drum machines"]],
-    [["var","morast"],["prop",".made_with"],["op"," = "],["str","\"audiotool synths + fx only\""]]
-  ];
-  let prio=[...PRIORITY];
-  function nextLine(){
-    if(prio.length) return prio.shift();                    // morast facts come first
-    if(!bag.length){
-      // ...and recur more often than the rest (weighted in twice)
-      bag=[...LINES, ...PRIORITY, ...PRIORITY].sort(()=>Math.random()-.5);
-    }
-    return bag.pop();
-  }
+  function nextLine(){ if(!bag.length){ bag=[...LINES].sort(()=>Math.random()-.5); } return bag.pop(); }
   const active=new Set();
   function margin(){ return (window.innerWidth-1100)/2; }
   function overlaps(y,h){ for(const e of active){ const r=e.getBoundingClientRect(); if(Math.abs(r.top-y)<h+10) return true; } return false; }
@@ -547,7 +541,7 @@ btn.addEventListener("click",e=>{
   setTimeout(()=>btn.classList.remove("denied"), 600);
   denyWarn.classList.add("show");
   clearTimeout(_denyHide); _denyHide=setTimeout(()=>denyWarn.classList.remove("show"), 4200);
-  playGlitchVoice("voice-mute.mp3", {vol:0.9, stutter:false});
+  playGlitchVoice("voice-mute.mp3", {vol:0.9, stutter:false, grit:0.1, hp:180});
   setTimeout(()=>{ _denyBusy=false; }, 3600);   // no overlap (≈ voice length)
 });
 // music starts only via the LIGHTS ON button (see starter handler below)
@@ -675,21 +669,25 @@ document.querySelectorAll(".frame iframe").forEach(ifr=>{
 // quiet, dezent-glitched PA voice (only works after a real click has unlocked audio)
 function playGlitchVoice(file, opts){
   opts=opts||{}; const vol=(opts.vol!=null)?opts.vol:0.5; const stutter=(opts.stutter!==false);
+  const gritAmt=(opts.grit!=null)?opts.grit:0.18; const hp=(opts.hp!=null)?opts.hp:0;
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     const ac=new AC(); if(ac.state==="suspended") ac.resume();
     const el=new Audio(file);
     const src=ac.createMediaElementSource(el);
     const g=ac.createGain(); g.gain.value=vol;
-    const ws=ac.createWaveShaper();                        // a hair of grit
+    // optional high-pass to clear muddy bass so consonants cut through
+    let head=g;
+    if(hp>0){ const f=ac.createBiquadFilter(); f.type="highpass"; f.frequency.value=hp; g.connect(f); head=f; }
+    const ws=ac.createWaveShaper();                        // grit
     const n=1024,c=new Float32Array(n),k=6;
     for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); }
     ws.curve=c; ws.oversample="2x";
-    const wet=ac.createGain(); wet.gain.value=0.18;
+    const wet=ac.createGain(); wet.gain.value=gritAmt;
     const dry=ac.createGain(); dry.gain.value=1.0;
     src.connect(g);
-    g.connect(dry); dry.connect(ac.destination);
-    g.connect(ws); ws.connect(wet); wet.connect(ac.destination);
+    head.connect(dry); dry.connect(ac.destination);
+    head.connect(ws); ws.connect(wet); wet.connect(ac.destination);
     el.play().then(()=>{
       if(!stutter) return;
       const dur=el.duration||1.1;
