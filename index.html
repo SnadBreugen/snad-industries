@@ -197,6 +197,7 @@ apps.forEach(a=>{
       if(!voiceArmed) return;                          // ignore until armed after lights-on
       if(frame.dataset.played==="1") return;          // once per app
       hoverTimer=setTimeout(()=>{
+        if(window.__isSpeaking && window.__isSpeaking()) return;   // never overlap; user can re-hover
         frame.dataset.played="1";
         playVoice(a.voice, ()=>{ frame.dataset.done="1"; });
         if(a.say) typeCaption(sayEl, a.say, Math.max(1200,(a.len||4.6)*1000-500));
@@ -250,11 +251,39 @@ function typeCaption(el,text,ms){
 // happens to rest on won't fire; armed shortly after, only fresh hovers trigger.
 let voiceArmed=false;
 
+// ── only one voice at a time ──
+let _speaking=false;
+function beginSpeak(el){
+  _speaking=true;
+  const done=()=>{ _speaking=false; };
+  el.addEventListener("ended",done,{once:true});
+  el.addEventListener("pause",done,{once:true});
+  el.addEventListener("error",done,{once:true});
+}
+window.__isSpeaking=()=>_speaking;
+// short harsh "denied / busy" blip (a tone, not a voice — may overlap speech)
+function errorBlip(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    const ac=new AC(), t=ac.currentTime;
+    function beep(start,freq){
+      const o=ac.createOscillator(); o.type="square"; o.frequency.value=freq;
+      const bg=ac.createGain();
+      bg.gain.setValueAtTime(0,start); bg.gain.linearRampToValueAtTime(0.28,start+0.005);
+      bg.gain.setValueAtTime(0.28,start+0.085); bg.gain.linearRampToValueAtTime(0,start+0.11);
+      o.connect(bg); bg.connect(ac.destination); o.start(start); o.stop(start+0.13);
+    }
+    beep(t,220); beep(t+0.16,175);
+    setTimeout(()=>{try{ac.close();}catch(e){}},700);
+  }catch(e){}
+}
+
 let _voice=null;
 function playVoice(src,onended){
   try{
     if(_voice){ _voice.pause(); _voice=null; }
     _voice=new Audio(src); _voice.volume=0.95;
+    beginSpeak(_voice);
     if(onended){ _voice.addEventListener("ended",onended,{once:true}); }
     _voice.play().catch(()=>{ if(onended) onended(); });
   }catch(e){ if(onended) onended(); }
@@ -541,8 +570,12 @@ btn.addEventListener("click",e=>{
   setTimeout(()=>btn.classList.remove("denied"), 600);
   denyWarn.classList.add("show");
   clearTimeout(_denyHide); _denyHide=setTimeout(()=>denyWarn.classList.remove("show"), 4200);
-  playGlitchVoice("voice-mute.mp3", {vol:0.9, stutter:false, grit:0.1, hp:180});
-  setTimeout(()=>{ _denyBusy=false; }, 3600);   // no overlap (≈ voice length)
+  if(window.__isSpeaking && window.__isSpeaking()){
+    errorBlip();                                            // a voice is already talking → just the blip
+  } else {
+    try{ const mv=new Audio("voice-mute.mp3"); mv.volume=1.0; beginSpeak(mv); mv.play().catch(()=>{}); }catch(e){}
+  }
+  setTimeout(()=>{ _denyBusy=false; }, 3600);   // no double-trigger
 });
 // music starts only via the LIGHTS ON button (see starter handler below)
 try{ loadBuffer(); }catch(e){}   // pre-decode morast.flac on the start screen (silent, context stays suspended)
@@ -672,8 +705,10 @@ function playGlitchVoice(file, opts){
   const gritAmt=(opts.grit!=null)?opts.grit:0.18; const hp=(opts.hp!=null)?opts.hp:0;
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    if(window.__isSpeaking && window.__isSpeaking()) return;   // never overlap another voice
     const ac=new AC(); if(ac.state==="suspended") ac.resume();
     const el=new Audio(file);
+    beginSpeak(el);
     const src=ac.createMediaElementSource(el);
     const g=ac.createGain(); g.gain.value=vol;
     // optional high-pass to clear muddy bass so consonants cut through
