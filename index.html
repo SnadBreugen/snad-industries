@@ -280,14 +280,19 @@ function errorBlip(){
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     const ac=new AC(), t=ac.currentTime;
-    function beep(start,freq){
-      const o=ac.createOscillator(); o.type="triangle"; o.frequency.value=freq;
-      const bg=ac.createGain();
-      bg.gain.setValueAtTime(0,start); bg.gain.linearRampToValueAtTime(0.5,start+0.008);
-      bg.gain.exponentialRampToValueAtTime(0.0001,start+0.15);
-      o.connect(bg); bg.connect(ac.destination); o.start(start); o.stop(start+0.18);
-    }
-    beep(t,720); beep(t+0.15,600);     // louder, cuts through the voice — but not harsh
+    const out=ac.createGain(); out.gain.value=0.9; out.connect(ac.destination);
+    // hard knock transient
+    const nb=ac.createBuffer(1, ac.sampleRate*0.06, ac.sampleRate), nd=nb.getChannelData(0);
+    for(let i=0;i<nd.length;i++){ nd[i]=(Math.random()*2-1)*Math.pow(1-i/nd.length,4); }
+    const nsrc=ac.createBufferSource(); nsrc.buffer=nb;
+    const nf=ac.createBiquadFilter(); nf.type="bandpass"; nf.frequency.value=180; nf.Q.value=0.7;
+    const ng=ac.createGain(); ng.gain.value=0.8;
+    nsrc.connect(nf); nf.connect(ng); ng.connect(out); nsrc.start(t);
+    // low menacing hum that decays
+    const o=ac.createOscillator(); o.type="sawtooth"; o.frequency.setValueAtTime(64,t); o.frequency.exponentialRampToValueAtTime(48,t+0.35);
+    const lp=ac.createBiquadFilter(); lp.type="lowpass"; lp.frequency.setValueAtTime(420,t); lp.frequency.exponentialRampToValueAtTime(160,t+0.35);
+    const og=ac.createGain(); og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.55,t+0.02); og.gain.exponentialRampToValueAtTime(0.0001,t+0.42);
+    o.connect(lp); lp.connect(og); og.connect(out); o.start(t); o.stop(t+0.45);
     setTimeout(()=>{try{ac.close();}catch(e){}},700);
   }catch(e){}
 }
