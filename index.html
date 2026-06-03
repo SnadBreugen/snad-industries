@@ -102,8 +102,8 @@
   #starter:hover .sw{color:var(--lime);border-color:var(--lime);box-shadow:0 0 24px rgba(191,255,1,.25)}
   #starter:hover .sw .bulb{background:var(--lime);box-shadow:0 0 16px 3px rgba(191,255,1,.7)}
   .lightarrow{position:fixed;z-index:201;pointer-events:none;transform:translate(-50%,-50%);transition:opacity .45s ease}
-  .lightarrow .ah{display:inline-block;font-size:70px;line-height:1;color:var(--lime);filter:drop-shadow(0 0 12px rgba(191,255,1,.85));transform:rotate(var(--ang,0deg));animation:arrowNudge 1s ease-in-out infinite}
-  @keyframes arrowNudge{0%,100%{transform:rotate(var(--ang,0deg)) translateX(0)}50%{transform:rotate(var(--ang,0deg)) translateX(12px)}}
+  .lightarrow .ah{display:inline-block;font-size:150px;line-height:1;color:var(--lime);filter:drop-shadow(0 0 12px rgba(191,255,1,.85));transform:rotate(var(--ang,0deg));animation:arrowNudge 1s ease-in-out infinite}
+  @keyframes arrowNudge{0%,100%{transform:rotate(var(--ang,0deg)) translateX(0)}50%{transform:rotate(var(--ang,0deg)) translateX(18px)}}
   #starter.blackout{background:#000;transition:background .5s ease}
   #starter.blackout .sw{color:#0d0d0d;border-color:#161616;background:#050505;box-shadow:none!important}
   #starter.blackout .sw .bulb{background:#161616;box-shadow:none!important}
@@ -732,7 +732,7 @@ function playGlitchVoice(file, opts){
     if(window.__isSpeaking && window.__isSpeaking()) return;   // never overlap another voice
     const ac=new AC(); if(ac.state==="suspended") ac.resume();
     const el=new Audio(file);
-    if(rate!==1){ el.playbackRate=rate; el.preservesPitch=false; el.mozPreservesPitch=false; el.webkitPreservesPitch=false; }  // slow + drop pitch = leiern
+    if(rate!==1){ el.playbackRate=rate; el.preservesPitch=true; el.mozPreservesPitch=true; el.webkitPreservesPitch=true; }  // slow but keep pitch = time-stretch
     beginSpeak(el);
     const src=ac.createMediaElementSource(el);
     const g=ac.createGain(); g.gain.value=vol;
