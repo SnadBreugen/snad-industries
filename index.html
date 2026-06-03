@@ -101,9 +101,13 @@
   #starter .sw .bulb{width:16px;height:16px;border-radius:50%;background:#333;box-shadow:0 0 0 0 rgba(191,255,1,0)}
   #starter:hover .sw{color:var(--lime);border-color:var(--lime);box-shadow:0 0 24px rgba(191,255,1,.25)}
   #starter:hover .sw .bulb{background:var(--lime);box-shadow:0 0 16px 3px rgba(191,255,1,.7)}
-  .lightarrow{position:fixed;z-index:201;pointer-events:none;transform:translate(-50%,-50%);transition:opacity .45s ease}
-  .lightarrow .ah{display:inline-block;font-size:150px;line-height:1;color:var(--lime);filter:drop-shadow(0 0 12px rgba(191,255,1,.85));transform:rotate(var(--ang,0deg));animation:arrowNudge 1s ease-in-out infinite}
-  @keyframes arrowNudge{0%,100%{transform:rotate(var(--ang,0deg)) translateX(0)}50%{transform:rotate(var(--ang,0deg)) translateX(18px)}}
+  /* escalating switch colours (persist) */
+  #starter.s1 .sw,#starter.s1:hover .sw{color:var(--lime);border-color:var(--lime);box-shadow:0 0 26px rgba(191,255,1,.45)}
+  #starter.s1 .sw .bulb{background:var(--lime);box-shadow:0 0 16px 3px rgba(191,255,1,.7)}
+  #starter.s2 .sw,#starter.s2:hover .sw{color:var(--amber);border-color:var(--amber);box-shadow:0 0 26px rgba(255,178,40,.5)}
+  #starter.s2 .sw .bulb{background:var(--amber);box-shadow:0 0 16px 3px rgba(255,178,40,.7)}
+  #starter.s3 .sw,#starter.s3:hover .sw{color:#ff2a2a;border-color:#ff2a2a;box-shadow:0 0 30px rgba(255,42,42,.6)}
+  #starter.s3 .sw .bulb{background:#ff2a2a;box-shadow:0 0 18px 4px rgba(255,42,42,.8)}
   #starter.blackout{background:#000;transition:background .5s ease}
   #starter.blackout .sw{color:#0d0d0d;border-color:#161616;background:#050505;box-shadow:none!important}
   #starter.blackout .sw .bulb{background:#161616;box-shadow:none!important}
@@ -840,26 +844,18 @@ const starter=document.getElementById("starter");
 if(starter){
   const sw=starter.querySelector(".sw");
   let besideClicks=0;
-  // a click that ISN'T the switch is a real gesture → escalating "turn the lights on" sequence
-  function showArrowToSwitch(mx,my,color){
-    const s=starter.querySelector(".sw"); if(!s) return;
-    const r=s.getBoundingClientRect();
-    const ang=Math.atan2((r.top+r.height/2)-my, (r.left+r.width/2)-mx)*180/Math.PI;
-    const a=document.createElement("div"); a.className="lightarrow";
-    a.style.left=mx+"px"; a.style.top=my+"px"; a.style.setProperty("--ang", ang+"deg");
-    a.innerHTML="<span class='ah'>&#10142;</span>";
-    if(color){ const ah=a.querySelector(".ah"); ah.style.color=color; ah.style.filter="drop-shadow(0 0 12px "+color+")"; }
-    document.body.appendChild(a);
-    setTimeout(()=>{ a.style.opacity="0"; setTimeout(()=>a.remove(),500); }, 2800);
-  }
+  // a click that ISN'T the switch escalates: same voice repeats, the switch changes colour, 4th = lights out
   starter.addEventListener("click",(e)=>{
     if(e.target.closest(".sw")) return;                       // that's the real LIGHTS ON
     if(starter.classList.contains("blackout")) return;        // already dark; only the switch works now
     besideClicks++;
-    if(besideClicks===1){ showArrowToSwitch(e.clientX,e.clientY,"#BFFF01"); playGlitchVoice("voice-idle.mp3"); }
-    else if(besideClicks===2){ showArrowToSwitch(e.clientX,e.clientY,"#FFB228"); playGlitchVoice("voice-idle2.mp3"); }
-    else if(besideClicks===3){ showArrowToSwitch(e.clientX,e.clientY,"#ff2a2a"); playGlitchVoice("voice-idle.mp3",{rate:0.6}); }
-    else if(besideClicks===4){ powerDownSound(); starter.classList.add("blackout"); }  // the lights go out — switch stays, barely
+    if(besideClicks<=3){
+      starter.classList.remove("s1","s2","s3");
+      starter.classList.add("s"+besideClicks);                // lime → amber → red, persists
+      playGlitchVoice("voice-idle.mp3");                       // same voice each time
+    } else if(besideClicks===4){
+      powerDownSound(); starter.classList.add("blackout");     // lights out — switch stays, barely
+    }
   });
   (sw||starter).addEventListener("click",(e)=>{
     e.stopPropagation();
