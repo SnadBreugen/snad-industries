@@ -104,6 +104,11 @@
   .lightarrow{position:fixed;z-index:201;pointer-events:none;transform:translate(-50%,-50%);transition:opacity .45s ease}
   .lightarrow .ah{display:inline-block;font-size:70px;line-height:1;color:var(--lime);filter:drop-shadow(0 0 12px rgba(191,255,1,.85));transform:rotate(var(--ang,0deg));animation:arrowNudge 1s ease-in-out infinite}
   @keyframes arrowNudge{0%,100%{transform:rotate(var(--ang,0deg)) translateX(0)}50%{transform:rotate(var(--ang,0deg)) translateX(12px)}}
+  #starter.blackout{background:#000;transition:background .5s ease}
+  #starter.blackout .sw{color:#0d0d0d;border-color:#161616;background:#050505;box-shadow:none!important}
+  #starter.blackout .sw .bulb{background:#161616;box-shadow:none!important}
+  #starter.blackout:hover .sw{color:#191919;border-color:#1c1c1c;box-shadow:none}
+  #starter.blackout:hover .sw .bulb{background:#191919;box-shadow:none}
   #starter .sub{margin-top:18px;font-size:12px;color:#46463f;letter-spacing:3px;text-transform:uppercase}
   #starter.hide{opacity:0;pointer-events:none;transition:opacity .6s ease}
 
@@ -280,6 +285,20 @@ function errorBlip(){
     }
     beep(t,560); beep(t+0.14,470);     // soft, polite "nope"
     setTimeout(()=>{try{ac.close();}catch(e){}},700);
+  }catch(e){}
+}
+// power-down: pitch + filter drop, like the mains cutting out
+function powerDownSound(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    const ac=new AC(), t=ac.currentTime;
+    const o=ac.createOscillator(); o.type="sawtooth";
+    o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(26,t+0.55);
+    const f=ac.createBiquadFilter(); f.type="lowpass";
+    f.frequency.setValueAtTime(2200,t); f.frequency.exponentialRampToValueAtTime(180,t+0.55);
+    const g=ac.createGain(); g.gain.setValueAtTime(0.32,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.75);
+    o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.8);
+    setTimeout(()=>{try{ac.close();}catch(e){}},950);
   }catch(e){}
 }
 
@@ -707,12 +726,13 @@ document.querySelectorAll(".frame iframe").forEach(ifr=>{
 // quiet, dezent-glitched PA voice (only works after a real click has unlocked audio)
 function playGlitchVoice(file, opts){
   opts=opts||{}; const vol=(opts.vol!=null)?opts.vol:0.5; const stutter=(opts.stutter!==false);
-  const gritAmt=(opts.grit!=null)?opts.grit:0.18; const hp=(opts.hp!=null)?opts.hp:0;
+  const gritAmt=(opts.grit!=null)?opts.grit:0.18; const hp=(opts.hp!=null)?opts.hp:0; const rate=(opts.rate!=null)?opts.rate:1;
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     if(window.__isSpeaking && window.__isSpeaking()) return;   // never overlap another voice
     const ac=new AC(); if(ac.state==="suspended") ac.resume();
     const el=new Audio(file);
+    if(rate!==1){ el.playbackRate=rate; el.preservesPitch=false; el.mozPreservesPitch=false; el.webkitPreservesPitch=false; }  // slow + drop pitch = leiern
     beginSpeak(el);
     const src=ac.createMediaElementSource(el);
     const g=ac.createGain(); g.gain.value=vol;
@@ -819,24 +839,27 @@ function playIdleGlitch(){ playGlitchVoice("voice-idle.mp3"); }
 const starter=document.getElementById("starter");
 if(starter){
   const sw=starter.querySelector(".sw");
-  let idleArmed=false;
-  // a click that ISN'T the switch is a real gesture → the PA speaks at once (quiet, glitched), once
-  function showArrowToSwitch(mx,my){
+  let besideClicks=0;
+  // a click that ISN'T the switch is a real gesture → escalating "turn the lights on" sequence
+  function showArrowToSwitch(mx,my,color){
     const s=starter.querySelector(".sw"); if(!s) return;
     const r=s.getBoundingClientRect();
     const ang=Math.atan2((r.top+r.height/2)-my, (r.left+r.width/2)-mx)*180/Math.PI;
     const a=document.createElement("div"); a.className="lightarrow";
     a.style.left=mx+"px"; a.style.top=my+"px"; a.style.setProperty("--ang", ang+"deg");
     a.innerHTML="<span class='ah'>&#10142;</span>";
+    if(color){ const ah=a.querySelector(".ah"); ah.style.color=color; ah.style.filter="drop-shadow(0 0 12px "+color+")"; }
     document.body.appendChild(a);
     setTimeout(()=>{ a.style.opacity="0"; setTimeout(()=>a.remove(),500); }, 2800);
   }
   starter.addEventListener("click",(e)=>{
-    if(e.target.closest(".sw")) return;                   // that's the real LIGHTS ON
-    showArrowToSwitch(e.clientX, e.clientY);              // point them to the switch
-    if(idleArmed) return;
-    idleArmed=true;
-    playIdleGlitch();
+    if(e.target.closest(".sw")) return;                       // that's the real LIGHTS ON
+    if(starter.classList.contains("blackout")) return;        // already dark; only the switch works now
+    besideClicks++;
+    if(besideClicks===1){ showArrowToSwitch(e.clientX,e.clientY,"#BFFF01"); playGlitchVoice("voice-idle.mp3"); }
+    else if(besideClicks===2){ showArrowToSwitch(e.clientX,e.clientY,"#FFB228"); playGlitchVoice("voice-idle2.mp3"); }
+    else if(besideClicks===3){ showArrowToSwitch(e.clientX,e.clientY,"#ff2a2a"); playGlitchVoice("voice-idle.mp3",{rate:0.6}); }
+    else if(besideClicks===4){ powerDownSound(); starter.classList.add("blackout"); }  // the lights go out — switch stays, barely
   });
   (sw||starter).addEventListener("click",(e)=>{
     e.stopPropagation();
