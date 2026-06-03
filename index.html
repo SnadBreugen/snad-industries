@@ -547,7 +547,7 @@ btn.addEventListener("click",e=>{
   setTimeout(()=>btn.classList.remove("denied"), 600);
   denyWarn.classList.add("show");
   clearTimeout(_denyHide); _denyHide=setTimeout(()=>denyWarn.classList.remove("show"), 4200);
-  playGlitchVoice("voice-mute.mp3");
+  playGlitchVoice("voice-mute.mp3", {vol:0.9, stutter:false});
   setTimeout(()=>{ _denyBusy=false; }, 3600);   // no overlap (≈ voice length)
 });
 // music starts only via the LIGHTS ON button (see starter handler below)
@@ -673,13 +673,14 @@ document.querySelectorAll(".frame iframe").forEach(ifr=>{
 });
 
 // quiet, dezent-glitched PA voice (only works after a real click has unlocked audio)
-function playGlitchVoice(file){
+function playGlitchVoice(file, opts){
+  opts=opts||{}; const vol=(opts.vol!=null)?opts.vol:0.5; const stutter=(opts.stutter!==false);
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     const ac=new AC(); if(ac.state==="suspended") ac.resume();
     const el=new Audio(file);
     const src=ac.createMediaElementSource(el);
-    const g=ac.createGain(); g.gain.value=0.5;            // quieter
+    const g=ac.createGain(); g.gain.value=vol;
     const ws=ac.createWaveShaper();                        // a hair of grit
     const n=1024,c=new Float32Array(n),k=6;
     for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); }
@@ -690,19 +691,21 @@ function playGlitchVoice(file){
     g.connect(dry); dry.connect(ac.destination);
     g.connect(ws); ws.connect(wet); wet.connect(ac.destination);
     el.play().then(()=>{
-      const dur=el.duration||1.1, base=0.5;
+      if(!stutter) return;
+      const dur=el.duration||1.1;
       const drops=2+Math.floor(Math.random()*2);          // 2–3 short dropouts = dezent stutter
       for(let i=0;i<drops;i++){
         const t=ac.currentTime+0.15+Math.random()*Math.max(0.3,dur-0.4);
         const len=0.02+Math.random()*0.03;                // 20–50 ms
-        g.gain.setValueAtTime(base,t);
+        g.gain.setValueAtTime(vol,t);
         g.gain.setValueAtTime(0.0,t+0.001);
-        g.gain.setValueAtTime(base,t+len);
+        g.gain.setValueAtTime(vol,t+len);
       }
     }).catch(()=>{});
     el.addEventListener("ended",()=>{ setTimeout(()=>{try{ac.close();}catch(e){}},200); });
   }catch(e){}
 }
+function playIdleGlitch(){ playGlitchVoice("voice-idle.mp3"); }   // idle stays quiet + stutter
 function playIdleGlitch(){ playGlitchVoice("voice-idle.mp3"); }
 
 // ── periodic promo announcements: fixed order, app-level volume, chorus+bitcrush+crackle, speech-synced light pulse ──
