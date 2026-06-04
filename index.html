@@ -621,6 +621,8 @@ btn.addEventListener("click",e=>{
 });
 // music starts only via the LIGHTS ON button (see starter handler below)
 try{ loadBuffer(); }catch(e){}   // pre-decode morast.flac on the start screen (silent, context stays suspended)
+// preload the start-screen voices so they play instantly on click (mobile networks load on demand otherwise)
+["voice-idle-dry.mp3","voice-idle.mp3","voice-mute.mp3"].forEach(f=>{ try{ const a=new Audio(); a.preload="auto"; a.src=f; a.load(); }catch(e){} });
 setIcon();
 
 // iOS/WebKit cuts audio hard on screen-off — a fade isn't enough. Stop the source and
