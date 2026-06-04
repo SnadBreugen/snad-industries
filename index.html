@@ -354,6 +354,7 @@ function clickTick(vol,pan){
 let lastPip=0;
 function marginPip(pan){
   try{
+    if(document.hidden) return;          // no pips while the tab/screen is away
     const now=performance.now();
     if(now-lastPip < 110) return;        // global throttle → single felt blips, no rattle
     lastPip=now;
@@ -631,6 +632,7 @@ function _hardSilence(){
   try{ if(srcNode){ try{srcNode.stop();}catch(e){} try{srcNode.disconnect();}catch(e){} srcNode=null; } }catch(e){}
   try{ if(actx){ actx.close(); } }catch(e){}
   actx=null; gain=null; buf=null; loadingP=null;
+  try{ if(tickCtx){ tickCtx.close(); tickCtx=null; } }catch(e){}   // pip context too
 }
 function _resumeAudio(){
   if(!on) return;
