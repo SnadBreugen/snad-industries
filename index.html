@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#0a0a0a;--fg:#e8e6dd;--dim:#76766e;--line:#222220;
-    --orange:#F08020;--cyan:#2BDBE2;--magenta:#E0249A;--lime:#BFFF01;--amber:#FFB228;--mint:#00f5c4;
+    --orange:#F08020;--cyan:#2BDBE2;--magenta:#E0249A;--lime:#BFFF01;--amber:#FFB228;--mint:#00f5c4;--red:#FF1A1A;
     --kw:#A375F7;--str:#83DD3F;--fn:#2BDBE2;--com:#5f5f57;}
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth;scrollbar-gutter:stable}
@@ -158,6 +158,11 @@
 
 <script>
 const apps=[
+  {file:"cover-drecksler.html", name:"the drecksler", kind:"vocal workbench", ac:"--red", voice:"voice-drecksler.mp3", len:8.75,
+   say:"What enters as a voice leaves as a signal. This is not a loss.",
+   url:"https://snadbreugen.github.io/the-drecksler/",
+   desc:"A vocal workbench: record or import a take, then chop, tune and dirty it up — and transmit it straight to Audiotool.",
+   feat:["Record or import, then chop, tune and dirty it up","Editor, chopper, pitch-snap and finisher in one chain","Sing and snap to key, then transmit to Audiotool"]},
   {file:"cover-tonefall.html", name:"tonefall", kind:"music game", ac:"--amber", voice:"voice-tonefall.mp3", len:4.6,
    say:"Game systems active. Productivity will resume shortly.",
    url:"https://snadbreugen.github.io/tonefall-audiotool/",
@@ -956,7 +961,7 @@ function cinematicIntro(){
         { duration:950, easing:"cubic-bezier(.4,0,.2,1)", fill:"both" }
       );
       anim.onfinish=()=>{ html.style.overflow=""; window.__tourReady=true; setTimeout(()=>{ try{_wrapEl.style.willChange="";}catch(e){} }, 80); };
-    }, 1200);   // hold the lit full overview, then zoom in to tonefall
+    }, 1200);   // hold the lit full overview, then zoom in to the top app
   }catch(e){ document.documentElement.style.overflow=""; }
 }
 </script>
