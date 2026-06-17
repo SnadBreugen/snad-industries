@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNAMPLER — promo banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0c0b0a; --orange:#E8743A; --ink:#ece7db; --dim:#8d8578; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#000;color:var(--ink);font-family:"Space Mono",monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+
+  .banner{position:relative;width:1200px;height:630px;overflow:hidden;background:#0c0b0a;
+    background-image:radial-gradient(120% 90% at 80% 50%,rgba(232,116,58,.12),transparent 55%);}
+  .banner::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.4;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+
+  .inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:center;padding:64px 70px;max-width:560px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .kicker .bars{display:flex;align-items:flex-end;gap:3px;height:24px}
+  .kicker .bars i{width:4px;background:var(--orange);display:block;border-radius:1px;box-shadow:0 0 8px rgba(232,116,58,.5)}
+  .kicker .by{font-size:13px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--dim)}
+  .word{font-family:"Anton",sans-serif;font-weight:400;line-height:.92;font-size:82px;letter-spacing:1px;color:var(--orange);text-shadow:0 0 32px rgba(232,116,58,.4)}
+  .tag{margin-top:22px;max-width:500px;font-size:21px;line-height:1.5;color:#d9d3c8}
+  .tag b{color:var(--ink);font-weight:700}
+
+  .rig{position:absolute;right:70px;top:50%;transform:translateY(-50%);z-index:2;width:380px;
+    filter:drop-shadow(0 0 26px rgba(232,116,58,.25));animation:bob 4.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-53%)}}
+  .rig svg{width:100%;height:auto;display:block}
+  .mk{animation:scan 4s linear infinite}
+  @keyframes scan{0%{transform:translateX(0)}100%{transform:translateX(296px)}}
+
+  .ticker{position:absolute;left:0;right:0;bottom:0;z-index:5;height:54px;background:#F4F0E8;overflow:hidden;display:flex;align-items:center;border-top:3px solid #0c0b0a}
+  .tk{display:flex;white-space:nowrap;animation:scroll 24s linear infinite}
+  .tk span{font-family:"Space Mono",monospace;font-weight:700;font-size:17px;letter-spacing:2px;color:#2a2014;padding:0 22px}
+  .tk span b{color:#E8743A}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+<script>(function(){var F=true,q=[];var R=window.requestAnimationFrame.bind(window),I=window.setInterval.bind(window),T=window.setTimeout.bind(window);window.requestAnimationFrame=function(c){if(F){q.push([0,c]);return 0}return R(c)};window.setTimeout=function(c,d){var a=[].slice.call(arguments,2);if(F){q.push([1,c,d,a]);return 0}return T.apply(null,[c,d].concat(a))};window.setInterval=function(c,d){var a=[].slice.call(arguments,2);if(F){q.push([2,c,d,a]);return 0}return I.apply(null,[c,d].concat(a))};function rel(){if(!F)return;F=false;var s=document.getElementById('__fz');if(s)s.remove();try{document.documentElement.classList.remove('snadfrozen')}catch(e){}window.requestAnimationFrame=R;window.setTimeout=function(c,d){var a=[].slice.call(arguments,2);return T.apply(null,[c,d].concat(a))};window.setInterval=function(c,d){var a=[].slice.call(arguments,2);return I.apply(null,[c,d].concat(a))};q.forEach(function(it){if(it[0]===0)R(it[1]);else if(it[0]===1)T.apply(null,[it[1],it[2]].concat(it[3]));else I.apply(null,[it[1],it[2]].concat(it[3]))});q=[]}window.__snadRelease=rel;window.addEventListener('message',function(e){if(e&&e.data==='snad:play')rel()},false);try{var st=document.createElement('style');st.id='__fz';st.textContent='.snadfrozen *{animation-play-state:paused!important;transition:none!important}';document.documentElement.appendChild(st);document.documentElement.classList.add('snadfrozen')}catch(e){}if(window.top===window.self){T(rel,60)}})();</script>
+</head>
+<body>
+  <div class="banner">
+    <div class="rig" aria-hidden="true">
+      <svg viewBox="0 0 344 230">
+        <!-- editor panel -->
+        <rect x="2" y="2" width="340" height="226" rx="10" fill="#222019" stroke="#34302a" stroke-width="1.5"/>
+        <!-- header -->
+        <text x="18" y="26" font-family="'Space Mono',monospace" font-size="12" letter-spacing="2" fill="#8d8578">SAMPLE // EDITOR</text>
+        <g font-family="'Space Mono',monospace" font-size="10" letter-spacing="1.5" fill="#a59e8d">
+          <rect x="214" y="14" width="52" height="18" rx="4" fill="#2a2720"/>
+          <text x="222" y="27" fill="#E8743A">GRANULAR</text>
+        </g>
+        <!-- waveform area -->
+        <rect x="14" y="44" width="316" height="120" rx="6" fill="#1c1b17" stroke="#34302a" stroke-width="1"/>
+        <line x1="14" y1="104" x2="330" y2="104" stroke="#2a2720" stroke-width="1"/>
+        <g transform="translate(0,40)">
+          <path d="M18.0 87.7L18.0 120.3M20.1 89.0L20.1 119.0M22.1 83.2L22.1 124.8M24.2 69.8L24.2 138.2M26.3 68.9L26.3 139.1M28.3 71.4L28.3 136.6M30.4 76.9L30.4 131.1M32.5 87.8L32.5 120.2M34.5 90.9L34.5 117.1M36.6 86.4L36.6 121.6M38.7 85.2L38.7 122.8M40.7 67.2L40.7 140.8M42.8 75.2L42.8 132.8M44.9 76.7L44.9 131.3M46.9 84.8L46.9 123.2M49.0 87.7L49.0 120.3M51.1 91.6L51.1 116.4M53.1 73.6L53.1 134.4M55.2 75.3L55.2 132.7M57.3 76.1L57.3 131.9M59.3 85.1L59.3 122.9M61.4 89.0L61.4 119.0M63.5 77.7L63.5 130.3M65.5 94.4L65.5 113.6M67.6 80.3L67.6 127.7M69.7 76.9L69.7 131.1M71.7 80.5L71.7 127.5M73.8 93.8L73.8 114.2M75.9 90.0L75.9 118.0M77.9 84.6L77.9 123.4M80.0 95.5L80.0 112.5M82.1 92.0L82.1 116.0M84.1 88.2L84.1 119.8M86.2 84.2L86.2 123.8M88.3 92.6L88.3 115.4M90.3 89.0L90.3 119.0M92.4 97.3L92.4 110.7M94.5 88.6L94.5 119.4M96.6 89.3L96.6 118.7M98.6 88.1L98.6 119.9M100.7 87.7L100.7 120.3M102.8 85.9L102.8 122.1M104.8 86.8L104.8 121.2M106.9 95.1L106.9 112.9M109.0 87.2L109.0 120.8M111.0 92.9L111.0 115.1M113.1 86.8L113.1 121.2M115.2 96.9L115.2 111.1M117.2 88.4L117.2 119.6M119.3 95.4L119.3 112.6M121.4 98.8L121.4 109.2M123.4 93.4L123.4 114.6M125.5 98.9L125.5 109.1M127.6 97.5L127.6 110.5M129.6 89.2L129.6 118.8M131.7 96.9L131.7 111.1M133.8 96.1L133.8 111.9M135.8 93.3L135.8 114.7M137.9 92.4L137.9 115.6M140.0 94.1L140.0 113.9M142.0 92.1L142.0 115.9M144.1 94.2L144.1 113.8M146.2 94.3L146.2 113.7M148.2 99.3L148.2 108.7M150.3 97.8L150.3 110.2M152.4 99.6L152.4 108.4M154.4 92.7L154.4 115.3M156.5 92.3L156.5 115.7M158.6 98.5L158.6 109.5M160.6 94.0L160.6 114.0M162.7 98.9L162.7 109.1M164.8 97.4L164.8 110.6M166.8 100.2L166.8 107.8M168.9 100.6L168.9 107.4M171.0 99.8L171.0 108.2M173.0 98.4L173.0 109.6M175.1 97.2L175.1 110.8M177.2 94.3L177.2 113.7M179.2 98.3L179.2 109.7M181.3 98.7L181.3 109.3M183.4 99.0L183.4 109.0M185.4 97.3L185.4 110.7M187.5 98.8L187.5 109.2M189.6 101.3L189.6 106.7M191.6 97.0L191.6 111.0M193.7 99.0L193.7 109.0M195.8 96.8L195.8 111.2M197.8 100.7L197.8 107.3M199.9 97.9L199.9 110.1M202.0 98.9L202.0 109.1M204.0 97.7L204.0 110.3M206.1 98.6L206.1 109.4M208.2 99.4L208.2 108.6M210.2 99.8L210.2 108.2M212.3 100.8L212.3 107.2M214.4 101.9L214.4 106.1M216.4 100.5L216.4 107.5M218.5 99.6L218.5 108.4M220.6 100.8L220.6 107.2M222.6 97.8L222.6 110.2M224.7 98.6L224.7 109.4M226.8 99.7L226.8 108.3M228.8 101.8L228.8 106.2M230.9 98.4L230.9 109.6M233.0 100.0L233.0 108.0M235.0 100.0L235.0 108.0M237.1 101.9L237.1 106.1M239.2 102.0L239.2 106.0M241.2 99.4L241.2 108.6M243.3 100.1L243.3 107.9M245.4 100.9L245.4 107.1M247.4 99.8L247.4 108.2M249.5 100.4L249.5 107.6M251.6 99.7L251.6 108.3M253.7 101.5L253.7 106.5M255.7 102.2L255.7 105.8M257.8 101.2L257.8 106.8M259.9 102.5L259.9 105.5M261.9 100.0L261.9 108.0M264.0 101.7L264.0 106.3M266.1 100.7L266.1 107.3M268.1 101.4L268.1 106.6M270.2 102.6L270.2 105.4M272.3 102.6L272.3 105.4M274.3 101.4L274.3 106.6M276.4 101.7L276.4 106.3M278.5 100.5L278.5 107.5M280.5 102.8L280.5 105.2M282.6 100.6L282.6 107.4M284.7 100.7L284.7 107.3M286.7 101.6L286.7 106.4M288.8 101.6L288.8 106.4M290.9 101.9L290.9 106.1M292.9 102.0L292.9 106.0M295.0 102.0L295.0 106.0M297.1 102.6L297.1 105.4M299.1 102.7L299.1 105.3M301.2 102.8L301.2 105.2M303.3 102.5L303.3 105.5M305.3 101.2L305.3 106.8M307.4 102.0L307.4 106.0M309.5 102.8L309.5 105.2M311.5 101.9L311.5 106.1M313.6 102.7L313.6 105.3M315.7 102.0L315.7 106.0M317.7 101.7L317.7 106.3M319.8 102.8L319.8 105.2M321.9 102.8L321.9 105.2M323.9 102.4L323.9 105.6M326.0 102.1L326.0 105.9" stroke="#E8743A" stroke-width="1.2"/>
+        </g>
+        <!-- marker / playhead -->
+        <g class="mk" transform="translate(0,40)">
+          <line x1="34" y1="46" x2="34" y2="164" stroke="#E8743A" stroke-width="2"/>
+        </g>
+        <!-- granular knobs -->
+        <g>
+          <g transform="translate(40,196)"><circle r="15" fill="#26231d" stroke="#403a31" stroke-width="1.5"/><line x1="0" y1="0" x2="7" y2="-9" stroke="#E8743A" stroke-width="2" stroke-linecap="round"/><text y="30" text-anchor="middle" font-family="'Space Mono',monospace" font-size="8" letter-spacing="1" fill="#8d8578">POSITION</text></g>
+          <g transform="translate(110,196)"><circle r="15" fill="#26231d" stroke="#403a31" stroke-width="1.5"/><line x1="0" y1="0" x2="9" y2="-3" stroke="#E8743A" stroke-width="2" stroke-linecap="round"/><text y="30" text-anchor="middle" font-family="'Space Mono',monospace" font-size="8" letter-spacing="1" fill="#8d8578">GRAIN</text></g>
+          <g transform="translate(180,196)"><circle r="15" fill="#26231d" stroke="#403a31" stroke-width="1.5"/><line x1="0" y1="0" x2="-6" y2="-8" stroke="#E8743A" stroke-width="2" stroke-linecap="round"/><text y="30" text-anchor="middle" font-family="'Space Mono',monospace" font-size="8" letter-spacing="1" fill="#8d8578">DENSITY</text></g>
+          <g transform="translate(250,196)"><circle r="15" fill="#26231d" stroke="#403a31" stroke-width="1.5"/><line x1="0" y1="0" x2="8" y2="6" stroke="#E8743A" stroke-width="2" stroke-linecap="round"/><text y="30" text-anchor="middle" font-family="'Space Mono',monospace" font-size="8" letter-spacing="1" fill="#8d8578">SPRAY</text></g>
+          <g transform="translate(310,196)"><circle r="15" fill="#26231d" stroke="#403a31" stroke-width="1.5"/><line x1="0" y1="0" x2="2" y2="-10" stroke="#E8743A" stroke-width="2" stroke-linecap="round"/><text y="30" text-anchor="middle" font-family="'Space Mono',monospace" font-size="8" letter-spacing="1" fill="#8d8578">SCAN</text></g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="inner">
+      <div class="kicker">
+        <span class="bars"><i style="height:10px"></i><i style="height:20px"></i><i style="height:24px"></i><i style="height:14px"></i><i style="height:8px"></i></span>
+        <span class="by">Snad Industries</span>
+      </div>
+      <div class="word">SNAMPLER</div>
+      <div class="tag">A <b>SAMPLE RIG</b>. Load, slice, granulate &mdash; the signal continues.</div>
+    </div>
+
+    <div class="ticker"><div class="tk" id="tk"></div></div>
+  </div>
+<script>
+  const items=["IMPORT WAV","IMPORT MIDI","PIANO ROLL","GRANULAR ENGINE","FREEZE · SCAN · STRETCH","EXPORT TO AUDIOTOOL","THE SIGNAL CONTINUES"];
+  const line=items.map(t=>`<span>${t} <b>·</b></span>`).join("");
+  document.getElementById("tk").innerHTML=line+line;
+</script>
+</body>
+</html>
