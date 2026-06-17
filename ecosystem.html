@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNAD INDUSTRIES // SIGNAL MAP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&family=Anton&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#070707; --ink:#f2efe6; --dim:#8d8b82; --line:#23231f; --cyan:#2BDBE2; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:"Space Mono",monospace;min-height:100vh;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.4;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.035) 0 1px,transparent 1px 3px)}
+  .wrap{max-width:1240px;margin:0 auto;padding:clamp(20px,4vw,48px);position:relative;z-index:3}
+  header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px;flex-wrap:wrap;gap:12px}
+  .brand{font-family:'VT323',monospace;font-size:clamp(28px,5vw,46px);line-height:.9;letter-spacing:1px;color:var(--ink);text-decoration:none}
+  .brand span{color:var(--cyan)}
+  .back{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:6px;transition:all .2s}
+  .back:hover{color:var(--cyan);border-color:var(--cyan)}
+  .ttl{margin:26px 0 4px;font-family:'Anton',sans-serif;font-size:clamp(30px,6vw,54px);letter-spacing:1px}
+  .sub{color:var(--dim);font-size:14px;letter-spacing:1px;max-width:640px;line-height:1.5}
+  .legend{display:flex;gap:22px;margin:18px 0 6px;font-size:12px;letter-spacing:1px;color:var(--dim);flex-wrap:wrap}
+  .legend b{color:var(--ink);font-weight:400}
+  .stage{width:100%;margin-top:6px}
+  .foot{margin-top:18px;text-align:right;color:var(--dim);font-family:'VT323',monospace;font-size:20px;letter-spacing:3px}
+  svg{display:block;width:100%;height:auto}
+  .gloss-stop-mid{stop-color:#ffffff}
+  text{font-family:'Space Mono',monospace}
+  .dname{font-family:'VT323',monospace}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="index.html"><b>SNAD</b> <span>//</span> INDUSTRIES</a>
+      <a class="back" href="index.html">&larr; back to the rack</a>
+    </header>
+
+    <div class="ttl">THE SIGNAL MAP</div>
+    <div class="sub">Every Snad device plugs into the same place: your Audiotool studio. Here is how each one moves audio in and out of the timeline.</div>
+    <div class="legend"><span><b>&larr;</b> into the device (import)</span><span><b>&rarr;</b> into the studio (export)</span><span style="color:#ffd400"><b>&middot;&middot;&middot;</b> coming soon</span></div>
+
+    <div class="stage">
+      <svg id="map" viewBox="0 0 1200 940" aria-label="Snad device ecosystem around Audiotool">
+        <defs>
+          <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#d7eef2"/>
+            <stop offset="42%" stop-color="#eafaff"/>
+            <stop offset="50%" stop-color="#ffffff"/>
+            <stop offset="58%" stop-color="#eafaff"/>
+            <stop offset="100%" stop-color="#d7eef2"/>
+            <animateTransform attributeName="gradientTransform" type="translate" values="-0.7 0; 0.7 0; -0.7 0" dur="6s" repeatCount="indefinite"/>
+          </linearGradient>
+          <linearGradient id="reflfade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff" stop-opacity=".22"/>
+            <stop offset="70%" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+          <mask id="reflmask"><rect x="0" y="0" width="2971" height="462" fill="url(#reflfade)"/></mask>
+        </defs>
+
+        <g id="links"></g>
+        <g id="nodes"></g>
+
+        <!-- AUDIOTOOL hub -->
+        <g id="hub">
+          <g transform="translate(600,402) scale(0.118) translate(-1485.5,-231)">
+            <path d="M183.376 96.0993C284.683 96.0993 366.761 177.819 366.761 278.69V413.201C366.761 439.711 345.154 461.229 318.53 461.229L315.08 461.106C298.237 459.936 283.73 450.131 276.114 436.178C248.926 452.073 217.22 461.229 183.376 461.229C82.0717 461.227 0.00182598 379.451 0 278.638C3.343e-09 177.823 82.0706 96.101 183.376 96.0993ZM183.438 192.199C135.492 192.199 96.5677 230.894 96.5677 278.69C96.5677 326.487 135.436 365.13 183.438 365.13C231.439 365.129 270.299 326.43 270.299 278.69C270.299 230.951 231.439 192.2 183.438 192.199Z" fill="url(#gloss)"/><path d="M728.325 96.0993C754.949 96.0993 776.555 117.609 776.556 144.118V278.638C776.554 379.452 694.477 461.229 593.171 461.229L588.556 461.167C489.491 458.669 409.911 377.932 409.91 278.638V144.118C409.911 117.611 431.51 96.1013 458.132 96.0993C484.755 96.0993 506.361 117.609 506.363 144.118V278.638C506.364 326.376 545.232 365.13 593.233 365.13C641.233 365.128 680.092 326.432 680.094 278.638V144.118C680.095 117.609 701.702 96.0994 728.325 96.0993Z" fill="url(#gloss)"/><path d="M1552.6 96.0993C1653.91 96.0993 1735.99 177.819 1735.99 278.69C1735.99 379.562 1653.85 461.229 1552.6 461.229C1451.35 461.227 1369.22 379.505 1369.22 278.69C1369.22 177.876 1451.29 96.101 1552.6 96.0993ZM1552.6 192.199C1504.66 192.2 1465.74 230.895 1465.74 278.69C1465.74 326.485 1504.6 365.128 1552.6 365.13C1600.6 365.13 1639.47 326.43 1639.47 278.69C1639.47 230.951 1600.55 192.199 1552.6 192.199Z" fill="url(#gloss)"/><path d="M2237.28 96.0993C2338.59 96.101 2420.66 177.82 2420.66 278.69C2420.66 379.561 2338.59 461.227 2237.28 461.229C2136.03 461.229 2053.9 379.506 2053.9 278.69C2053.9 177.875 2135.98 96.0993 2237.28 96.0993ZM2237.28 192.199C2189.34 192.199 2150.41 230.894 2150.41 278.69C2150.41 326.487 2189.28 365.13 2237.28 365.13C2285.28 365.128 2324.14 326.429 2324.14 278.69C2324.14 230.952 2285.28 192.2 2237.28 192.199Z" fill="url(#gloss)"/><path d="M2647.2 96.0993C2748.51 96.101 2830.58 177.82 2830.58 278.69C2830.58 379.561 2748.51 461.227 2647.2 461.229C2545.95 461.229 2463.82 379.506 2463.82 278.69C2463.82 177.875 2545.89 96.0993 2647.2 96.0993ZM2647.2 192.199C2599.26 192.199 2560.33 230.894 2560.33 278.69C2560.33 326.487 2599.2 365.13 2647.2 365.13C2695.2 365.128 2734.06 326.429 2734.06 278.69C2734.06 230.952 2695.2 192.2 2647.2 192.199Z" fill="url(#gloss)"/><path d="M1277.85 144.171C1304.48 144.172 1326.08 165.69 1326.08 192.199V413.201C1326.08 439.71 1304.48 461.219 1277.85 461.22C1251.17 461.22 1229.62 439.711 1229.62 413.201V192.199C1229.62 165.689 1251.23 144.171 1277.85 144.171Z" fill="url(#gloss)"/><path d="M1827.37 6.83382e-08C1854 0.000273286 1875.6 21.5102 1875.6 48.0189V96.0377H1962.47C1989.09 96.0377 2010.7 117.556 2010.7 144.065C2010.7 170.574 1989.09 192.084 1962.47 192.084L1875.66 192.199V278.69C1875.66 326.43 1914.53 365.13 1962.53 365.13C1989.15 365.131 2010.75 386.637 2010.75 413.201C2010.75 439.766 1989.15 461.218 1962.53 461.22C1861.28 461.22 1779.14 379.505 1779.14 278.69V48.0189C1779.14 21.51 1800.75 6.99994e-08 1827.37 6.83382e-08Z" fill="url(#gloss)"/><path d="M1138.23 1.11316e-07C1164.91 0.00208704 1186.46 21.5113 1186.46 48.0189V278.629C1186.46 379.444 1104.39 461.167 1003.08 461.167H998.351C899.285 458.67 819.705 377.931 819.704 278.69C819.704 177.875 901.774 96.0993 1003.08 96.0993C1034.5 96.0994 1064.05 103.965 1089.94 117.837V48.0189C1089.94 21.51 1111.55 1.1298e-07 1138.23 1.11316e-07ZM1003.08 192.137C955.08 192.137 916.212 230.835 916.21 278.629C916.21 326.425 955.078 365.068 1003.08 365.068C1051.08 365.068 1089.94 326.368 1089.94 278.629C1089.94 230.891 1051.08 192.138 1003.08 192.137Z" fill="url(#gloss)"/><path d="M2921.96 0C2948.64 -1.64838e-09 2970.19 21.51 2970.19 48.0189V413.149C2970.19 439.658 2948.58 461.167 2921.96 461.167L2919.48 461.159C2893.96 459.873 2873.73 438.883 2873.73 413.201V48.0189C2873.68 21.5113 2895.28 0.00206299 2921.96 0Z" fill="url(#gloss)"/><path d="M1277.85 1.02605e-07C1304.48 0.0015143 1326.07 21.511 1326.08 48.0189C1326.08 74.5276 1304.48 96.0362 1277.85 96.0377H1275.37C1249.85 94.7512 1229.62 73.7602 1229.62 48.0804C1229.62 21.5707 1251.23 1.04267e-07 1277.85 1.02605e-07Z" fill="url(#gloss)"/>
+            <g transform="translate(0,540)" mask="url(#reflmask)" opacity=".5">
+              <g transform="translate(0,462) scale(1,-1)"><path d="M183.376 96.0993C284.683 96.0993 366.761 177.819 366.761 278.69V413.201C366.761 439.711 345.154 461.229 318.53 461.229L315.08 461.106C298.237 459.936 283.73 450.131 276.114 436.178C248.926 452.073 217.22 461.229 183.376 461.229C82.0717 461.227 0.00182598 379.451 0 278.638C3.343e-09 177.823 82.0706 96.101 183.376 96.0993ZM183.438 192.199C135.492 192.199 96.5677 230.894 96.5677 278.69C96.5677 326.487 135.436 365.13 183.438 365.13C231.439 365.129 270.299 326.43 270.299 278.69C270.299 230.951 231.439 192.2 183.438 192.199Z" fill="#F7FEFF"/><path d="M728.325 96.0993C754.949 96.0993 776.555 117.609 776.556 144.118V278.638C776.554 379.452 694.477 461.229 593.171 461.229L588.556 461.167C489.491 458.669 409.911 377.932 409.91 278.638V144.118C409.911 117.611 431.51 96.1013 458.132 96.0993C484.755 96.0993 506.361 117.609 506.363 144.118V278.638C506.364 326.376 545.232 365.13 593.233 365.13C641.233 365.128 680.092 326.432 680.094 278.638V144.118C680.095 117.609 701.702 96.0994 728.325 96.0993Z" fill="#F7FEFF"/><path d="M1552.6 96.0993C1653.91 96.0993 1735.99 177.819 1735.99 278.69C1735.99 379.562 1653.85 461.229 1552.6 461.229C1451.35 461.227 1369.22 379.505 1369.22 278.69C1369.22 177.876 1451.29 96.101 1552.6 96.0993ZM1552.6 192.199C1504.66 192.2 1465.74 230.895 1465.74 278.69C1465.74 326.485 1504.6 365.128 1552.6 365.13C1600.6 365.13 1639.47 326.43 1639.47 278.69C1639.47 230.951 1600.55 192.199 1552.6 192.199Z" fill="#F7FEFF"/><path d="M2237.28 96.0993C2338.59 96.101 2420.66 177.82 2420.66 278.69C2420.66 379.561 2338.59 461.227 2237.28 461.229C2136.03 461.229 2053.9 379.506 2053.9 278.69C2053.9 177.875 2135.98 96.0993 2237.28 96.0993ZM2237.28 192.199C2189.34 192.199 2150.41 230.894 2150.41 278.69C2150.41 326.487 2189.28 365.13 2237.28 365.13C2285.28 365.128 2324.14 326.429 2324.14 278.69C2324.14 230.952 2285.28 192.2 2237.28 192.199Z" fill="#F7FEFF"/><path d="M2647.2 96.0993C2748.51 96.101 2830.58 177.82 2830.58 278.69C2830.58 379.561 2748.51 461.227 2647.2 461.229C2545.95 461.229 2463.82 379.506 2463.82 278.69C2463.82 177.875 2545.89 96.0993 2647.2 96.0993ZM2647.2 192.199C2599.26 192.199 2560.33 230.894 2560.33 278.69C2560.33 326.487 2599.2 365.13 2647.2 365.13C2695.2 365.128 2734.06 326.429 2734.06 278.69C2734.06 230.952 2695.2 192.2 2647.2 192.199Z" fill="#F7FEFF"/><path d="M1277.85 144.171C1304.48 144.172 1326.08 165.69 1326.08 192.199V413.201C1326.08 439.71 1304.48 461.219 1277.85 461.22C1251.17 461.22 1229.62 439.711 1229.62 413.201V192.199C1229.62 165.689 1251.23 144.171 1277.85 144.171Z" fill="#F7FEFF"/><path d="M1827.37 6.83382e-08C1854 0.000273286 1875.6 21.5102 1875.6 48.0189V96.0377H1962.47C1989.09 96.0377 2010.7 117.556 2010.7 144.065C2010.7 170.574 1989.09 192.084 1962.47 192.084L1875.66 192.199V278.69C1875.66 326.43 1914.53 365.13 1962.53 365.13C1989.15 365.131 2010.75 386.637 2010.75 413.201C2010.75 439.766 1989.15 461.218 1962.53 461.22C1861.28 461.22 1779.14 379.505 1779.14 278.69V48.0189C1779.14 21.51 1800.75 6.99994e-08 1827.37 6.83382e-08Z" fill="#F7FEFF"/><path d="M1138.23 1.11316e-07C1164.91 0.00208704 1186.46 21.5113 1186.46 48.0189V278.629C1186.46 379.444 1104.39 461.167 1003.08 461.167H998.351C899.285 458.67 819.705 377.931 819.704 278.69C819.704 177.875 901.774 96.0993 1003.08 96.0993C1034.5 96.0994 1064.05 103.965 1089.94 117.837V48.0189C1089.94 21.51 1111.55 1.1298e-07 1138.23 1.11316e-07ZM1003.08 192.137C955.08 192.137 916.212 230.835 916.21 278.629C916.21 326.425 955.078 365.068 1003.08 365.068C1051.08 365.068 1089.94 326.368 1089.94 278.629C1089.94 230.891 1051.08 192.138 1003.08 192.137Z" fill="#F7FEFF"/><path d="M2921.96 0C2948.64 -1.64838e-09 2970.19 21.51 2970.19 48.0189V413.149C2970.19 439.658 2948.58 461.167 2921.96 461.167L2919.48 461.159C2893.96 459.873 2873.73 438.883 2873.73 413.201V48.0189C2873.68 21.5113 2895.28 0.00206299 2921.96 0Z" fill="#F7FEFF"/><path d="M1277.85 1.02605e-07C1304.48 0.0015143 1326.07 21.511 1326.08 48.0189C1326.08 74.5276 1304.48 96.0362 1277.85 96.0377H1275.37C1249.85 94.7512 1229.62 73.7602 1229.62 48.0804C1229.62 21.5707 1251.23 1.04267e-07 1277.85 1.02605e-07Z" fill="#F7FEFF"/></g>
+            </g>
+          </g>
+          <text x="600" y="470" text-anchor="middle" font-size="13" letter-spacing="6" fill="#8d8b82">STUDIO</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="foot">THE SIGNAL CONTINUES ///</div>
+  </div>
+
+<script>
+  const CX=600, CY=410, RX=452, RY=312;
+  const devices=[
+    {name:"snampler", kind:"sample rig", c:"#E8743A", url:"https://snadbreugen.github.io/snampler/",
+     flows:[{d:"in",t:"WAV + MIDI from timeline"},{d:"out",t:"export to timeline"}]},
+    {name:"the drecksler", kind:"vocal workbench", c:"#C5291C", url:"https://snadbreugen.github.io/the-drecksler/",
+     flows:[{d:"in",t:"WAV + vocoder carrier"},{d:"out",t:"transmit WAV"}]},
+    {name:"tonefall", kind:"music game", c:"#FFB228", url:"https://snadbreugen.github.io/tonefall-audiotool/",
+     flows:[{d:"out",t:"send loop · MIDI / audio"}]},
+    {name:"matrix evolutions", kind:"arpeggiator", c:"#E0249A", url:"https://snadbreugen.github.io/Matrix-Evolutions/",
+     flows:[{d:"in",t:"sample / carrier"},{d:"out",t:"render arpeggio"}]},
+    {name:"the color guy", kind:"recolor tool", c:"#2BDBE2", url:"https://snadbreugen.github.io/colorizateur/",
+     flows:[{d:"in",t:"read project"},{d:"out",t:"write colors"}]},
+    {name:"pack midi", kind:"midi export", c:"#F08020", url:"https://snadbreugen.github.io/pack-midi/",
+     flows:[{d:"in",t:"read note tracks"},{d:"out",t:"export .mid file"}]},
+    {name:"at vault", kind:"backup / transfer", c:"#BFFF01", url:"https://snadbreugen.github.io/at-vault/",
+     flows:[{d:"in",t:"back up project"},{d:"out",t:"restore to studio"}]},
+    {name:"DREX-LP", kind:"loop machine", c:"#ffd400", soon:true,
+     flows:[{d:"out",t:"render tracks to library"}]}
+  ];
+  const angles=[-90,-45,0,45,90,135,180,225];
+  const NS="http://www.w3.org/2000/svg";
+  const linksG=document.getElementById("links"), nodesG=document.getElementById("nodes");
+  const el=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+  devices.forEach((dv,i)=>{
+    const a=angles[i]*Math.PI/180;
+    const nx=CX+RX*Math.cos(a), ny=CY+RY*Math.sin(a);
+    const ux=Math.cos(a), uy=Math.sin(a);
+    const sx=CX+ux*150, sy=CY+uy*128;       // start near hub
+    const ex=nx-ux*96, ey=ny-uy*40;          // end near node
+    const hasOut=dv.flows.some(f=>f.d==="out"), hasIn=dv.flows.some(f=>f.d==="in");
+    // connector
+    const ln=el("line",{x1:sx,y1:sy,x2:ex,y2:ey,stroke:dv.c,"stroke-width":2,opacity:dv.soon?.5:.85});
+    if(dv.soon) ln.setAttribute("stroke-dasharray","7 7");
+    linksG.appendChild(ln);
+    // arrowheads
+    const head=(px,py,dirx,diry)=>{
+      const ang=Math.atan2(diry,dirx), s=9;
+      const p1x=px-s*Math.cos(ang-0.4), p1y=py-s*Math.sin(ang-0.4);
+      const p2x=px-s*Math.cos(ang+0.4), p2y=py-s*Math.sin(ang+0.4);
+      linksG.appendChild(el("polygon",{points:`${px},${py} ${p1x},${p1y} ${p2x},${p2y}`,fill:dv.c,opacity:dv.soon?.6:1}));
+    };
+    if(hasOut) head(sx,sy,-ux,-uy);          // toward hub
+    if(hasIn)  head(ex,ey, ux, uy);          // toward device
+    // node box
+    const w=176,h=52;
+    const g=el("g",{});
+    const rect=el("rect",{x:nx-w/2,y:ny-h/2,width:w,height:h,rx:8,fill:"rgba(12,12,11,.92)",stroke:dv.c,"stroke-width":dv.soon?1.5:2});
+    if(dv.soon) rect.setAttribute("stroke-dasharray","6 5");
+    g.appendChild(rect);
+    const nm=el("text",{x:nx,y:ny-2,"text-anchor":"middle","font-size":22,fill:dv.c,class:"dname","letter-spacing":1});
+    nm.textContent=dv.name.toUpperCase();
+    g.appendChild(nm);
+    const kd=el("text",{x:nx,y:ny+15,"text-anchor":"middle","font-size":9,fill:"#8d8b82","letter-spacing":2});
+    kd.textContent=dv.soon?"LOOP MACHINE · COMING SOON":dv.kind.toUpperCase();
+    g.appendChild(kd);
+    if(dv.url){
+      const link=el("a",{}); link.setAttributeNS("http://www.w3.org/1999/xlink","href",dv.url); link.setAttribute("href",dv.url); link.setAttribute("target","_blank"); link.setAttribute("rel","noopener");
+      link.appendChild(g); nodesG.appendChild(link);
+    } else { nodesG.appendChild(g); }
+    // flow labels (outside the node, away from hub)
+    const lx=nx+ux*16, ly=ny+uy*(h/2+16);
+    const anchor = ux>0.3?"start":(ux<-0.3?"end":"middle");
+    const tx = anchor==="start"? nx+w/2+8 : anchor==="end"? nx-w/2-8 : nx;
+    let ty = ny + (uy>=0? h/2+18 : -h/2-8 - (dv.flows.length-1)*15);
+    dv.flows.forEach((f,j)=>{
+      const arrow=f.d==="in"?"\u2190":"\u2192";
+      const t=el("text",{x:tx,y:ty+j*15,"text-anchor":anchor,"font-size":11,fill:dv.soon?"#ffd400":"#cfcdc4","letter-spacing":.5,opacity:dv.soon?.8:1});
+      t.textContent=`${arrow} ${f.t}`;
+      nodesG.appendChild(t);
+    });
+  });
+</script>
+</body>
+</html>
