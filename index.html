@@ -1061,7 +1061,7 @@ function cinematicIntro(){
 
   var W=1280,H=820,cx=640,cy=410,rx=500,ry=300;
   var angles=[-90,-45,0,45,90,135,180,225];
-  var built=false, dia, svg, tip, hub, rainCtl, raf=0;
+  var built=false, dia, svg, tip, hub, rainCtl, raf=0, curScale=1;
   var nodes=[], visited={}, visitedCount=0, rotating=false, rot=0, rotSpeed=0, ROT_TARGET=0.05;
 
   function headPts(x,y,dx,dy){var ang=Math.atan2(dy,dx),s=11;return x+","+y+" "+(x-s*Math.cos(ang-0.42))+","+(y-s*Math.sin(ang-0.42))+" "+(x-s*Math.cos(ang+0.42))+","+(y-s*Math.sin(ang+0.42));}
@@ -1128,18 +1128,27 @@ function cinematicIntro(){
     fit(); window.addEventListener('resize',fit);
   }
 
-  function fit(){ if(!dia) return; var s=Math.min(innerWidth/W, innerHeight/H)*0.99; if(!isFinite(s)||s<=0)s=1; dia.style.transform='scale('+s+')'; }
+  function fit(){ if(!dia) return; var s=Math.min(innerWidth/W, innerHeight/H)*0.99; if(!isFinite(s)||s<=0)s=1; curScale=s; dia.style.transform='scale('+s+')'; }
 
   function frame(t){
     var time=t/1000;
+    // --- slow floating drift of the whole construct (one unit, no fast jitter) ---
+    var rm = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0 : 1;
+    var gx = (Math.sin(time*0.045)*46 + Math.sin(time*0.028+1.3)*22) * rm;   // mainly sideways
+    var gy = (Math.cos(time*0.037)*14 + Math.cos(time*0.021+0.6)*8) * rm;    // a gentle touch vertical
+    var marX = Math.max(0,(innerWidth  - W*curScale)/2);
+    var marY = Math.max(0,(innerHeight - H*curScale)/2);
+    var tx = Math.max(-marX*0.82, Math.min(marX*0.82, gx*curScale));         // never let it clip
+    var ty = Math.max(-marY*0.82, Math.min(marY*0.82, gy*curScale));
+    if(dia) dia.style.transform='translate('+tx+'px,'+ty+'px) scale('+curScale+')';
     if(rotating){ rotSpeed += (ROT_TARGET-rotSpeed)*0.012; rot += rotSpeed*0.016; }
     for(var i=0;i<nodes.length;i++){
       var nd=nodes[i];
-      var br=1+Math.sin(time*0.22+nd.ph1)*0.025;
+      var br=1+Math.sin(time*0.10+nd.ph1)*0.03;
       var ang=nd.baseAngle+rot;
       var bx=cx+rx*br*Math.cos(ang), by=cy+ry*br*Math.sin(ang);
-      nd.x=bx+Math.sin(time*nd.fs1+nd.ph1)*12+Math.sin(time*nd.fs1*1.7+nd.ph1b)*5;
-      nd.y=by+Math.cos(time*nd.fs2+nd.ph2)*12+Math.cos(time*nd.fs2*1.6+nd.ph2b)*5;
+      nd.x=bx+Math.sin(time*nd.fs1*0.6+nd.ph1)*6+Math.sin(time*nd.fs1*1.1+nd.ph1b)*3;
+      nd.y=by+Math.cos(time*nd.fs2*0.6+nd.ph2)*6+Math.cos(time*nd.fs2*1.1+nd.ph2b)*3;
       nd.wrap.style.transform='translate('+nd.x+'px,'+nd.y+'px)';
       var dx=nd.x-cx, dy=nd.y-cy, len=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/len, uy=dy/len, px=-uy, py=ux;
       var hr=1/Math.sqrt((ux/172)*(ux/172)+(uy/74)*(uy/74));
